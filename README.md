@@ -1,7 +1,15 @@
 # Azure NetApp Files to Azure AI Foundry: Zero-Copy RAG Workshop
 
 ## Overview
-This repository contains the lab guide and resources for building an **Enterprise RAG (Retrieval-Augmented Generation)** pipeline. The workshop demonstrates a "Zero-Copy" architecture where financial data stored in **Azure NetApp Files (ANF)** is exposed to **Azure AI Foundry** agents via **Microsoft Fabric OneLake**, without manual data migration.
+This workshop demonstrates a **prescriptive enterprise approach** for deploying Retrieval‑Augmented Generation (RAG) without data duplication. Customers keep their governed, high‑value financial data in **Azure NetApp Files** as the system of record, expose it through **Microsoft Fabric OneLake**, and enable **Azure AI Foundry agents** to retrieve and reason over that data, without migrating or re‑platforming the source datasets.
+
+The architecture establishes a **Zero‑Copy AI data path**: 
+*   **Azure NetApp Files** provides performance, security, and enterprise file semantics
+*   **Microsoft Fabric OneLake** virtualizes access using native shortcuts
+*   **Azure AI Foundry** orchestrates retrieval, grounding, and agent workflows directly against the virtualized data
+  This allows customers to stand up production‑ready RAG experiences faster, reduce data sprawl, and preserve existing governance and operational models.
+
+The outcome is an **AI entry scenario** for regulated and data‑intensive enterprises: accelerate RAG adoption, minimize architectural disruption, and operationalize AI agents on trusted data—without creating new storage silos or brittle ingestion pipelines.
 
 ## Architecture
 The solution leverages the **ANF Object REST API** to project files as S3 objects, which are then virtualized in OneLake and indexed by Azure AI Search.
