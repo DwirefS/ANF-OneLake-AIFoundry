@@ -70,15 +70,20 @@ graph TD
     *   **Protocol**: NFSv3 (Standard for Linux/Analytics) or SMB.
     *   **Review + Create**.
 2.  **Enable Object Access**:
-    *   Navigate to the Volume > **Object Access** (or **Export Policy** > **Object**).
-    *   **Action**: Enable Object Access.
-    *   **Upload Certificate**: (If required by the preview UI) You may need to upload a self-signed **PEM** formatted certificate to trust the connection.
-        *   *Command to generate*: `openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes`
-3.  **Create Bucket & Keys**:
-    *   Click **+ Add Bucket** (if not auto-created). Map it to the volume root `/`.
-    *   Click **View Credentials** or **Generate Keys**.
-    *   **CRITICAL**: Copy the `Access Key`, `Secret Key`, and `Endpoint URL` (e.g., `https://10.1.1.4`) to a secure note. You will NOT see the Secret Key again.
-4.  **Upload Data**:
+    *   **Prerequisite**: You must have a **PEM-encoded self-signed certificate** ready (for the preview security model).
+    *   Navigate to your Volume.
+    *   Select the **Buckets** blade (sometimes under "Storage" or "Object Access" depending on rollout).
+    *   *Note*: If you see "Object Access" feature toggle, Enable it first.
+3.  **Create Bucket**:
+    *   Click **+ Add Bucket**.
+    *   **Name**: Enter a bucket name (e.g., `finance-bucket`).
+    *   **Path**: Root `/` (to expose the whole volume) or specific path.
+    *   **Certificate**: Upload your PEM certificate here (First time setup).
+    *   **Create**.
+4.  **Generate Credentials**:
+    *   Inside the new Bucket blade, click **Generate Keys** (or "View Credentials").
+    *   **CRITICAL**: Copy the `Access Key`, `Secret Key`, and `Endpoint URL` (e.g., `https://10.1.1.4` or `https://<account>.blob...`). You will NOT see the Secret Key again.
+5.  **Upload Data**:
     *   Access the volume via standard NFS mount or SMB share.
     *   Copy the `test_data/invoices` folder and `test_data/financial_statements` folder to the volume.
     *   *Verification*: These files should now be immediately visible via the Object (S3) endpoint.
@@ -109,7 +114,7 @@ graph TD
     *   In **Explorer**, right-click **Files** > **New shortcut**.
     *   Select source: **Amazon S3 Compatible**.
     *   Select the Connection created above.
-    *   **Bucket**: Enter the volume name (e.g., `anf-finance-vol`).
+    *   **Bucket**: Enter the volume name (e.g., `anf-finance-vol`) or the bucket name created in Module 1.
     *   **Name**: `anf_finance_data`.
     *   **Action**: Click the shortcut. You should see `invoices/` and `financial_statements/` immediately.
 
@@ -120,12 +125,11 @@ graph TD
 1.  **Import Data Wizard**:
     *   Go to **Azure AI Search** in Azure Portal.
     *   Click **Import and vectorizing data**.
-    *   **Source**: `Azure Data Lake Storage Gen2` (OneLake acts as ADLSv2).
-    *   **Connection String**:
-        *   Go to Fabric Lakehouse > Files > Properties.
-        *   Copy the **URL** (e.g., `https://onelake.dfs.fabric.microsoft.com/...`).
-        *   **Important**: Append the shortcut path if needed to scope it: `.../Files/anf_finance_data`.
-    *   **Managed Identity**: Ensure the AI Search System Identity has *Storage Blob Data Contributor* on the Fabric Workspace.
+    *   **Source**: Select **OneLake** (Do NOT select ADLS Gen2).
+    *   **Connection**:
+        *   Select "Microsoft Fabric".
+        *   Choose your **Workspace** and **Lakehouse**.
+        *   Browse to `Files` > `anf_finance_data`.
 2.  **Configure Vectorization**:
     *   **Kind**: `Azure OpenAI`.
     *   **Model**: `text-embedding-3-small` (or `ada-002`).
