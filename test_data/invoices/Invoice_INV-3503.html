@@ -1,0 +1,64 @@
+
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+            .invoice-title { font-size: 24px; font-weight: bold; color: #333; }
+            .details { margin-bottom: 20px; }
+            .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .table th, .table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            .table th { background-color: #f2f2f2; }
+            .total { text-align: right; margin-top: 20px; font-size: 18px; font-weight: bold; }
+            .footer { margin-top: 50px; font-size: 12px; color: #777; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div>
+                <div class="invoice-title">INVOICE</div>
+                <div>#INV-3503</div>
+                <div>Date: 2025-11-19</div>
+            </div>
+            <div style="text-align: right;">
+                <strong>WeWork</strong><br>
+                575 Lexington Ave, New York, NY
+            </div>
+        </div>
+        
+        <div class="details">
+            <strong>Bill To:</strong><br>
+            Contoso Financial Services<br>
+            123 Finance Dr<br>
+            New York, NY 10001
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>WeWork Services / Products</td>
+                    <td>1</td>
+                    <td>$9478.14</td>
+                    <td>$9478.14</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">
+            Total Due: $9478.14
+        </div>
+
+        <div class="footer">
+            Payment is due within 30 days. Thank you for your business.
+        </div>
+    </body>
+    </html>
+    

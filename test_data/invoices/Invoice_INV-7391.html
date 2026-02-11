@@ -1,0 +1,64 @@
+
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+            .invoice-title { font-size: 24px; font-weight: bold; color: #333; }
+            .details { margin-bottom: 20px; }
+            .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .table th, .table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            .table th { background-color: #f2f2f2; }
+            .total { text-align: right; margin-top: 20px; font-size: 18px; font-weight: bold; }
+            .footer { margin-top: 50px; font-size: 12px; color: #777; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <div>
+                <div class="invoice-title">INVOICE</div>
+                <div>#INV-7391</div>
+                <div>Date: 2026-02-10</div>
+            </div>
+            <div style="text-align: right;">
+                <strong>Azure Cloud Services</strong><br>
+                1 Microsoft Way, Redmond, WA
+            </div>
+        </div>
+        
+        <div class="details">
+            <strong>Bill To:</strong><br>
+            Contoso Financial Services<br>
+            123 Finance Dr<br>
+            New York, NY 10001
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Azure Cloud Services Services / Products</td>
+                    <td>1</td>
+                    <td>$7361.84</td>
+                    <td>$7361.84</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">
+            Total Due: $7361.84
+        </div>
+
+        <div class="footer">
+            Payment is due within 30 days. Thank you for your business.
+        </div>
+    </body>
+    </html>
+    

@@ -1,0 +1,51 @@
+Date,TransactionID,Vendor,Category,Amount,Description,Status
+2025-11-09,TRX-15242,Azure Cloud Services,Services,3681.63,Payment for Personnel services to Zoom,Posted
+2025-08-05,TRX-62070,OfficeMax,Office Supplies,2185.14,Payment for Hardware services to WeWork,Posted
+2025-05-16,TRX-75404,Salesforce,Personnel,4544.4,Payment for Services services to Zoom,Posted
+2025-04-28,TRX-16532,Azure Cloud Services,Software License,389.23,Payment for Office Supplies services to Zoom,Posted
+2025-10-17,TRX-96647,Salesforce,Office Supplies,3484.26,Payment for Personnel services to WeWork,Posted
+2025-05-04,TRX-86802,Salesforce,Software License,2469.5,Payment for Communication services to Dell Computers,Posted
+2026-01-25,TRX-13810,Salesforce,Rent,3564.76,Payment for Hardware services to Dell Computers,Posted
+2025-03-18,TRX-32870,Slack,Communication,4947.99,Payment for Cloud Infrastructure services to Dell Computers,Posted
+2026-01-02,TRX-57329,Slack,Office Supplies,489.0,Payment for Hardware services to WeWork,Posted
+2025-10-27,TRX-74364,Staffing Agency,Services,1528.39,Payment for Rent services to Slack,Posted
+2025-12-16,TRX-98152,Salesforce,Personnel,2894.14,Payment for Office Supplies services to WeWork,Posted
+2025-08-06,TRX-84549,WeWork,Hardware,2292.75,Payment for Cloud Infrastructure services to OfficeMax,Posted
+2025-08-06,TRX-88246,Dell Computers,Hardware,1300.41,Payment for Communication services to WeWork,Posted
+2025-05-06,TRX-32120,Salesforce,Cloud Infrastructure,4433.88,Payment for Services services to Slack,Posted
+2025-12-31,TRX-39718,WeWork,Rent,3294.73,Payment for Personnel services to Salesforce,Posted
+2025-08-09,TRX-98327,Salesforce,Personnel,1319.66,Payment for Personnel services to Dell Computers,Posted
+2025-08-17,TRX-68627,Azure Cloud Services,Office Supplies,379.35,Payment for Services services to Slack,Posted
+2025-05-31,TRX-95289,WeWork,Hardware,4006.79,Payment for Hardware services to WeWork,Posted
+2025-02-13,TRX-51669,Azure Cloud Services,Services,2370.69,Payment for Hardware services to Staffing Agency,Posted
+2025-06-11,TRX-87254,Slack,Personnel,1920.23,Payment for Communication services to Salesforce,Posted
+2025-10-15,TRX-46904,Salesforce,Hardware,3218.78,Payment for Personnel services to Staffing Agency,Posted
+2025-05-26,TRX-99540,Azure Cloud Services,Cloud Infrastructure,1313.08,Payment for Cloud Infrastructure services to Salesforce,Posted
+2026-01-05,TRX-28414,Azure Cloud Services,Office Supplies,1514.95,Payment for Personnel services to WeWork,Posted
+2025-04-19,TRX-53161,Dell Computers,Rent,4909.32,Payment for Software License services to WeWork,Posted
+2025-03-05,TRX-41041,Azure Cloud Services,Hardware,604.12,Payment for Software License services to Slack,Posted
+2025-02-21,TRX-93610,Zoom,Software License,2580.77,Payment for Rent services to OfficeMax,Posted
+2025-10-20,TRX-26236,Slack,Office Supplies,2035.67,Payment for Personnel services to Zoom,Posted
+2025-08-19,TRX-50171,Slack,Personnel,2088.22,Payment for Rent services to Zoom,Posted
+2025-04-11,TRX-90207,Salesforce,Hardware,4302.56,Payment for Hardware services to Dell Computers,Posted
+2025-07-22,TRX-97901,OfficeMax,Office Supplies,3368.75,Payment for Personnel services to Zoom,Posted
+2025-12-14,TRX-25115,Azure Cloud Services,Office Supplies,1931.77,Payment for Communication services to Salesforce,Posted
+2026-01-06,TRX-18982,Slack,Hardware,1162.27,Payment for Communication services to Dell Computers,Posted
+2025-05-28,TRX-28895,OfficeMax,Personnel,4826.63,Payment for Office Supplies services to Dell Computers,Posted
+2025-09-01,TRX-50513,OfficeMax,Rent,2439.21,Payment for Personnel services to Zoom,Posted
+2025-11-13,TRX-89662,Salesforce,Cloud Infrastructure,2977.63,Payment for Personnel services to Dell Computers,Posted
+2025-03-18,TRX-15511,WeWork,Personnel,830.22,Payment for Cloud Infrastructure services to OfficeMax,Posted
+2025-08-04,TRX-77798,Salesforce,Software License,3398.4,Payment for Software License services to Salesforce,Posted
+2025-02-25,TRX-77510,Staffing Agency,Rent,4069.4,Payment for Services services to Zoom,Posted
+2025-02-11,TRX-54893,Slack,Office Supplies,321.9,Payment for Communication services to WeWork,Posted
+2025-09-18,TRX-41289,OfficeMax,Personnel,4932.68,Payment for Cloud Infrastructure services to Dell Computers,Posted
+2025-09-11,TRX-92128,Azure Cloud Services,Services,4617.46,Payment for Services services to WeWork,Posted
+2025-04-25,TRX-35813,Dell Computers,Software License,1549.49,Payment for Office Supplies services to Slack,Posted
+2025-03-20,TRX-56086,Salesforce,Services,547.66,Payment for Cloud Infrastructure services to Salesforce,Posted
+2025-05-02,TRX-72972,WeWork,Communication,1702.05,Payment for Cloud Infrastructure services to Slack,Posted
+2025-09-10,TRX-96169,Dell Computers,Personnel,2627.94,Payment for Personnel services to Slack,Posted
+2025-09-25,TRX-44932,Staffing Agency,Personnel,2212.35,Payment for Cloud Infrastructure services to WeWork,Posted
+2025-08-14,TRX-64650,WeWork,Hardware,4524.47,Payment for Software License services to WeWork,Posted
+2026-01-29,TRX-34537,WeWork,Communication,4759.11,Payment for Communication services to Salesforce,Posted
+2025-12-02,TRX-81960,Azure Cloud Services,Office Supplies,1094.89,Payment for Office Supplies services to Zoom,Posted
+2025-10-17,TRX-99503,Slack,Personnel,4785.58,Payment for Communication services to Staffing Agency,Posted
