@@ -24,12 +24,12 @@ graph LR
 
 ### 1. The Lab Guide (`lab_guide.md`)
 *   **Path**: [lab_guide.md](file:///Users/dwirefs/.gemini/antigravity/brain/a59cccc5-2ee2-43ef-94f7-912d14d9b49f/lab_guide.md)
-*   **Status**: **Enhanced**.
-*   **Key Improvements**:
-    *   Added a detailed **Architecture Diagram**.
-    *   Expanded **Prerequisites** with required RBAC roles.
-    *   **Step-by-Step Instructions**: Now includes granular clicks (e.g., "Select Amazon S3 Compatible", "Copy Endpoint URL").
-    *   **Practical Testing Section**: Added 4 specific agent scenarios (Unstructured retrieval, Structured analysis, Cross-source synthesis, Compliance check) with expected outcomes.
+*   **Status**: **End-to-End Comprehensive**.
+*   **Key Enhancements**:
+    *   **Module 0: Environment Setup**: Starts at the very beginning with registering Resource Providers (`Microsoft.NetApp`, `Microsoft.Search`, etc.) and assigning Subscription-level RBAC roles.
+    *   **Dependency-Aware**: Explicitly lists prerequisites for each step (e.g., creating a Fabric Workspace before a Lakehouse, creating an OpenAI resource before indexing).
+    *   **Granular IAM Steps**: Details exactly where to assign permissions (e.g., assigning "Member" role to the Search Service Managed Identity in the Fabric Workspace).
+    *   **Specific Configurations**: Corrected ANF Object Access steps (Certificates, Buckets) and AI Search OneLake connection paths.
 
 ### 2. Dummy Data Suite (`test_data/`)
 *   **Path**: [test_data](file:///Users/dwirefs/.gemini/antigravity/brain/a59cccc5-2ee2-43ef-94f7-912d14d9b49f/test_data)
