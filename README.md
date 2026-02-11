@@ -35,7 +35,10 @@ The solution leverages the **Azure NetApp Files object REST API** to expose file
 [![Azure AI Foundry](https://img.youtube.com/vi/kL_mJUCNiK4/0.jpg)](https://www.youtube.com/watch?v=kL_mJUCNiK4)
 
 ## Disclaimer
-**educational-only**: This content is provided for educational and enablement purposes to demonstrate art-of-the-possible scenarios with Azure services. It is not intended for production use without further review and hardening. The authors and Microsoft assume no liability for the use of this code or documentation.
+**Educational Use Only**
+This content is provided for **educational and enablement purposes only** to illustrate example architectures and “art‑of‑the‑possible” scenarios using Azure services. It is **not intended for production use** without appropriate review, validation, security hardening, and operational readiness assessments.
+
+The code and documentation are provided **as‑is**, without warranties of any kind. The authors and Microsoft **assume no responsibility or liability** for the use of this content in any environment.
 
 ## License
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
