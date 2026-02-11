@@ -12,11 +12,12 @@ The architecture establishes a **Zero‑Copy AI data path**:
 The outcome is an **AI entry scenario** for regulated and data‑intensive enterprises: accelerate RAG adoption, minimize architectural disruption, and operationalize AI agents on trusted data—without creating new storage silos or brittle ingestion pipelines.
 
 ## Architecture
-The solution leverages the **ANF Object REST API** to project files as S3 objects, which are then virtualized in OneLake and indexed by Azure AI Search.
+The solution leverages the **Azure NetApp Files object REST API** to expose file‑based data through an **S3‑compatible object interface**, enabling downstream analytics and AI services to access the same data without duplication.
 
-1.  **Storage**: Azure NetApp Files (NFS/SMB) with Object REST API enabled.
-2.  **Integration**: Microsoft Fabric OneLake via S3-Compatible Shortcuts.
-3.  **Intelligence**: Azure AI Search (OneLake Indexer) and Azure AI Foundry Agents.
+1.  **Storage**: Azure NetApp Files (NFS/SMB) with Object REST API enabled
+2.  **Data Access**: Microsoft Fabric OneLake using S3‑compatible shortcuts
+3.  **Indexing & Retrieval**: Azure AI Search (OneLake files indexer) for indexing and enrichment, with **Azure AI Foundry agents** using the indexed content for retrieval‑augmented generation
+4.  **Orchestration**: Azure AI Foundry agents consuming indexed content for retrieval‑augmented generation
 
 ## Repository Contents
 *   **`lab_guide.md`**: The step-by-step instructions for the workshop.
