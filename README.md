@@ -23,6 +23,13 @@ The solution leverages the **ANF Object REST API** to project files as S3 object
 *   **`test_data/`**: Dummy financial data (Invoices and CSV logs) for testing.
 *   **`generate_data.py`**: Scripts used to generate the test data.
 
+## Video Resources
+
+[![Azure NetApp Files Overview](https://img.youtube.com/vi/sPZs71kWECA/0.jpg)](https://www.youtube.com/watch?v=sPZs71kWECA)
+[![Microsoft Fabric Integration](https://img.youtube.com/vi/BWyoOaeomOY/0.jpg)](https://www.youtube.com/watch?v=BWyoOaeomOY)
+[![Azure AI Search](https://img.youtube.com/vi/4j94ownixEg/0.jpg)](https://www.youtube.com/watch?v=4j94ownixEg)
+[![Azure AI Foundry](https://img.youtube.com/vi/kL_mJUCNiK4/0.jpg)](https://www.youtube.com/watch?v=kL_mJUCNiK4)
+
 ## Disclaimer
 **educational-only**: This content is provided for educational and enablement purposes to demonstrate art-of-the-possible scenarios with Azure services. It is not intended for production use without further review and hardening. The authors and Microsoft assume no liability for the use of this code or documentation.
 
