@@ -23,6 +23,9 @@ The solution leverages the **ANF Object REST API** to project files as S3 object
 *   **`test_data/`**: Dummy financial data (Invoices and CSV logs) for testing.
 *   **`generate_data.py`**: Scripts used to generate the test data.
 
+  
+<img width="1654" height="929" alt="image" src="https://github.com/user-attachments/assets/5ee874f5-fe55-4bbf-ae2a-2b1d06a5b21c" />
+
 ## Video Resources
 
 [![Azure NetApp Files Overview](https://img.youtube.com/vi/sPZs71kWECA/0.jpg)](https://www.youtube.com/watch?v=sPZs71kWECA)
