@@ -301,4 +301,4 @@ Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your s
 *   **OneLake Shortcut Empty**: Verify the bucket name in the shortcut settings matches the ANF bucket exactly.
 *   **Indexer Error (403)**: Re-check Module 5.2. The Search Service Managed Identity MUST have permission on the Fabric Workspace/Item.
 *   **Agent "I don't know"**: Check "Strictness" (set to 3) and ensure the Indexer ran successfully (is document count > 0?).
-*   **Permissions Error in Foundry**: Ensure you assigned yourself **Cognitive Services OpenAI User** in Module 6.2.
+*   **Permissions Error in Foundry**: Ensure you assigned yourself **Cognitive Services OpenAI User** in Module 5.2.
