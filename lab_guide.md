@@ -159,6 +159,7 @@ Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your s
 **Goal**: Virtualize Azure NetApp Files data into Microsoft Fabric OneLake without copying it.
 
 ### 3.1 Deploy On-Premises Data Gateway  (Required for Private S3-Compatible Endpoints)
+This gateway is required by Microsoft Fabric when accessing private or VNet‑isolated S3‑compatible endpoints, such as Azure NetApp Files object REST API.
 1.  Create a **Windows VM** in the same VNet as your Azure NetApp Files volume:
     *   Size: Standard_D2s_v3 (Recommended)
 2.  RDP into the VM.
@@ -211,6 +212,14 @@ Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your s
 2.  Select **Manage access**.
 3.  Add the **Azure AI Search Managed Identity** (search by service name) as a **Member** or **Contributor**.
 
+**Note** This workshop intentionally uses unstructured files stored under the Lakehouse Files/ path to ensure a smooth indexing and RAG experience.
+Before running the Azure AI Search indexer, be aware of the following workshop‑specific guardrails:
+
+*   **Avoid Microsoft Purview sensitivity labels** on the Lakehouse or files used in this workshop.
+Sensitivity labels can prevent Azure AI Search from indexing OneLake content unless additional permissions and policy configuration are performed.
+*   **Use reasonably sized text‑based documents** (PDF, TXT, CSV).
+Very large files or complex binary formats may exceed Azure AI Search limits and result in partial or failed indexing.
+
 ### 4.3 Import and Vectorize Data
 1.  Open Azure AI Search → **Import and vectorizing data**.
 2.  **Source**: OneLake (Microsoft Fabric).
@@ -238,7 +247,7 @@ Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your s
 1.  **Azure Portal** > **Create a resource** > **Azure AI services** (Multi-service account).
 2.  **Configure**:
     *   **Name**: `Workshop-AI-Services`.
-    *   **Region**: **East US 2** (or `Sweden Central`, `West US 3` - regions with GPT-4o).
+    *   **Region**: **East US 2** (or `Sweden Central`, `West US 3` - regions with GPT-4o - If GPT‑4o is unavailable in your region, select an equivalent GPT‑4 or GPT‑4‑Turbo deployment.).
     *   **Pricing Tier**: Standard S0.
 3.  **Deploy Model**:
     *   Go to **Model deployments** (in the resource blade).
