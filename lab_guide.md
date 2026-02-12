@@ -1,8 +1,23 @@
 # Azure NetApp Files to Azure AI Foundry: Zero-Copy RAG Workshop
 
-## 1. Overview & Architecture
+## Overview & Architecture
+This lab demonstrates how **Azure AI Foundry** can ground AI agents on **enterprise file data stored in Azure NetApp Files** using **Microsoft Fabric OneLake shortcuts**, enabling a zero‑copy AI data path without ETL, data duplication, or re‑platforming.
+The solution architecture uses:
 
-This workshop guides you through building an **Enterprise RAG (Retrieval-Augmented Generation)** pipeline. You will expose financial data residing in an on-premises style **Azure NetApp Files (ANF)** volume to **Azure AI Foundry** agents, without moving or duplicating the original data.
+*   **Azure NetApp Files** as the authoritative system of record for unstructured file data
+*   **Object REST API** (S3‑compatible access) to expose file data for analytics and AI consumption
+*   **Microsoft Fabric OneLake shortcuts** to virtualize Azure NetApp Files data
+*   **Azure AI Search** to index virtualized data
+*   **Azure AI Foundry** to build and run agents grounded on that data
+
+This lab is intended for education, enablement, and design validation. It illustrates a supported architectural pattern, but it is not a production‑hardened reference architecture.
+
+### What this lab demonstrates
+
+*   How enterprise file data can remain in place on Azure NetApp Files while being consumed by analytics and AI services
+*   How OneLake shortcuts enable virtualized access to file data without copying it
+*   How Azure AI Foundry agents can be grounded on enterprise data through Azure AI Search
+*   How Azure NetApp Files participates as a first‑class data foundation for AI workloads on Azure
 
 ### The "Zero-Copy" Data Flow
 1.  **Storage**: Financial docs in ANF (NFS/SMB) are exposed via **Object REST API** (S3-compatible).
@@ -43,29 +58,101 @@ graph TD
 
 ---
 
-## 2. Prerequisites & Environment Setup
+## Prerequisites & Environment Setup
+
+This lab is designed to be approachable for customers and partners with general familiarity with Azure. The lab emphasizes solution flow and architectural intent, while calling out external documentation where deeper service‑level setup or advanced configuration may be required.
 
 **Goal**: Prepare your Azure subscription and user account with all necessary providers and permissions.
 
-### 2.1 Azure Subscription Requirements
-1.  **Login**: Go to [portal.azure.com](https://portal.azure.com) and sign in.
-2.  **Subscription Role**: Ensure you have **Owner** or **Contributor** + **User Access Administrator** on your subscription.
+## 1. Validate Azure Subscription Requirements
+**Goal**: Ensure your Azure subscription is ready to run the lab without permission or provider issues.
+1.  **Login**:
+    *   Open a browser and go to **https://portal.azure.com**
+    *   Sign in with your Azure work account.
+2.  **Verify Subscription Role**:
+    *   In the Azure portal, search for **Subscriptions**.
+    *   Select the subscription you will use for the lab.
+    *   Select **Access control (IAM)**.
+    *   Confirm your user has **Owner** or **Contributor + User Access Administrator**.
 3.  **Register Resource Providers**:
-    *   Search for **Subscriptions** > Select yours > **Resource providers**.
-    *   Register the following if not "Registered":
-        *   `Microsoft.NetApp`
-        *   `Microsoft.Search`
-        *   `Microsoft.CognitiveServices`
-        *   `Microsoft.MachineLearningServices` (Required for AI Foundry)
-        *   `Microsoft.Fabric` (if applicable)
+    *   From your subscription page, select Resource providers.
+    *   Ensure the following providers are Registered:
+        *   Microsoft.NetApp
+        *   Microsoft.Search
+        *   Microsoft.CognitiveServices
+        *   Microsoft.MachineLearningServices (required for Azure AI Foundry)
+        *   Microsoft.Fabric (required for OneLake / Fabric)
+    *   If any show **Not registered**, select the resource provider and click **Register**.
 
-### 2.2 ANF Preview Features
-1.  **Waitlist Approval**: The "Object REST API" features for Azure NetApp Files are in Public Preview. Ensure your subscription is whitelisted.
-2.  **Client Tool**: Instally a tool like **Cyberduck** or **S3 Browser** on your local machine to verify S3 connectivity.
+## 2. Configure Azure NetApp Files
+**Goal**: Create an Azure NetApp Files volume and enable S3‑compatible (Object REST API) access.
+*   **Waitlist Approval**: The "Object REST API" features for Azure NetApp Files are in Public Preview. Ensure your subscription is whitelisted.
+*   **Client Tool**: Instally a tool like **Cyberduck** or **S3 Browser** on your local machine to verify S3 connectivity.
 
-### 2.3 Download Lab Data
+### 2.1 Create NetApp Account and Capacity Pool
+
+1. In the Azure portal, search for **Azure NetApp Files**.
+2. Click **+ Create**.
+    *   **Name**: Workshop-NetApp-Account
+    *   **Region**: Choose a supported region (e.g., East US)
+3. After creation, open the NetApp account.
+4. Select **Capacity pools** → **+ Add pool**.
+    *   **Name**: Workshop-Pool
+    *   **Service level**: Standard
+    *   **Size**: 1 TiB (minimum)
+5. Click **Create**.
+
+### 2.2 Create a Volume
+
+1. In the NetApp account, select Volumes → + Add volume.
+2. Configure the volume:
+    *   **Name**: anf-finance-vol
+    *   **Quota**: 100 GiB
+    *   **Virtual network**: Select a VNet
+    *   **Subnet**: Select a delegated subnet (Microsoft.NetApp/volumes)
+    *   **Protocol**: NFS (NFSv3 recommended for this lab)
+3. Click **Review + Create** → **Create**.
+
+### 2.3 Enable Object (S3‑Compatible) Access
+
+Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your subscription is approved.
+
+1. Generate a Certificate (should this be uisng the portal?)
+    *   Open a terminal or command prompt.
+    *   Run: `openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes`
+    *   Save cert.pem.
+2. Enable Object Access
+    *   In the Azure portal, open your volume.
+    *   Navigate to Object access / Buckets (blade name may vary).
+    *   If prompted, click Enable Object Access.
+3. Create a Bucket
+    *   Click **+ Add bucket**.
+    *   **Name**: finance-data
+    *   **Path**: /
+    *   Upload the cert.pem file.
+    *   Click **Create**.
+4. Capture Credentials
+    *   Select View credentials (or Generate keys).
+    *   Copy and save to a secure location:
+        *   Endpoint URL
+        *   Access key
+        *   Secret key
+
+### 2.4 Download Lab Data
 *   Download the `test_data` folder from this repository to your local machine.
 
+### 2.5 Upload Lab Data
+
+1. Install a client such as Cyberduck or S3 Browser.
+2. Create a new S3 connection:
+    *   Endpoint: ANF Object endpoint
+    *   Access key / Secret key: From previous step
+    *   Enable Path‑style addressing if prompted.
+3. Upload the following folders to the bucket root:
+    *   invoices/
+    *   financial_statements/
+
+# HERE
 ---
 
 ## 3. Module 1: Configure Azure NetApp Files (Storage)
