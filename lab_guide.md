@@ -118,25 +118,25 @@ This lab is designed to be approachable for customers and partners with general 
 Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your subscription is approved.
 
 1. Generate a Certificate (should this be uisng the portal?)
-    *   Open a terminal or command prompt.
+    *   Open a terminal/command prompt.
     *   Run: `openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes`
-    *   Save cert.pem.
+    *   Save `cert.pem`.
 2. Enable Object Access
-    *   In the Azure portal, open your volume.
+    *   In the Azure portal, open your volume `anf-finance-vol`.
     *   Navigate to Object access / Buckets (blade name may vary).
-    *   If prompted, click Enable Object Access.
+    *   If prompted, click **Enable Object Access**.
 3. Create a Bucket
-    *   Click **+ Add bucket**.
-    *   **Name**: finance-data
-    *   **Path**: /
-    *   Upload the cert.pem file.
+    *   Click **+ Add Bucket**.
+    *   Name: `finance-data`.
+    *   Path: `/` (Root or applicable path).
+    *   **Upload Certificate**: Upload the `cert.pem` file you generated.
     *   Click **Create**.
 4. Capture Credentials
     *   Select View credentials (or Generate keys).
     *   Copy and save to a secure location:
-        *   Endpoint URL
-        *   Access key
-        *   Secret key
+        *   `Endpoint URL` (e.g., `https://10.0.0.4`)
+        *   `Access Key`
+        *   `Secret Key`
 
 ### 2.4 Download Lab Data
 *   Download the `test_data` folder from this repository to your local machine.
@@ -145,171 +145,118 @@ Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your s
 
 1. Install a client such as Cyberduck or S3 Browser.
 2. Create a new S3 connection:
-    *   Endpoint: ANF Object endpoint
-    *   Access key / Secret key: From previous step
-    *   Enable Path‑style addressing if prompted.
+    *   **Endpoint**: `ANF Object endpoint`
+    *   **Access key** / **Secret key**: From previous step
+    *   Enable **Path‑style addressing** if prompted.
 3. Upload the following folders to the bucket root:
-    *   invoices/
-    *   financial_statements/
-
-# HERE
----
-
-## 3. Module 1: Configure Azure NetApp Files (Storage)
-
-**Goal**: Create an NFS volume and enable S3-compatible access.
-
-### 3.1 Create NetApp Account & Pool
-1.  Search for **Azure NetApp Files**.
-2.  Click **+ Create** > Name: `Workshop-NetApp-Account` > Region: (e.g., *East US*).
-3.  Go to the new Account > **Capacity pools** > **+ Add pool**.
-    *   Name: `Workshop-Pool`
-    *   Service level: **Standard** (sufficient for lab).
-    *   Size: **1 TiB** (Minimum).
-    *   **Create**.
-
-### 3.2 Create Volume
-1.  In the NetApp Account > **Volumes** > **+ Add volume**.
-2.  **Basics**:
-    *   Name: `anf-finance-vol`
-    *   Quota: **100 GiB**.
-    *   Network: Select a VNet and a **delegated subnet** (Microsoft.NetApp/volumes).
-3.  **Protocol**: Select **NFS** (or SMB if preferred, NFSv3 is simplest for this lab).
-4.  **Review + Create**.
-
-### 3.3 Enable Object Access (The "S3" Step)
-1.  **Generate Certificate** (Required for Preview security):
-    *   Open a terminal/command prompt.
-    *   Run: `openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes`
-    *   Keep `cert.pem` ready.
-2.  **Configure Object Access**:
-    *   Go to your Volume > **Buckets** (blade may vary, check **Export Policy** or **Object Access**).
-    *   If prompted to "Enable Object Access", click **Enable**.
-3.  **Create Bucket**:
-    *   Click **+ Add Bucket**.
-    *   Name: `finance-data`.
-    *   Path: `/` (Root).
-    *   **Upload Certificate**: Upload the `cert.pem` file you generated.
-    *   **Create**.
-4.  **Get Credentials**:
-    *   Click **View Credentials** (or "Generate Keys").
-    *   **COPY THESE NOW**:
-        *   `Endpoint URL` (e.g., `https://10.0.0.4`)
-        *   `Access Key`
-        *   `Secret Key`
-
-### 3.4 Upload Data
-1.  Use Cyberduck/S3 Browser (or mount the volume via NFS).
-2.  Connect using the S3 Credentials and Endpoint.
-    *   *Note*: Use "Path Style" addressing if asked.
-3.  Upload the `invoices` folder and `financial_statements` folder to the bucket root.
+    *   `invoices/`
+    *   `financial_statements/`
 
 ---
 
-## 4. Module 2: Connect OneLake (Integration)
+## 3. Create a OneLake Shortcut to Azure NetApp Files
 
-**Goal**: Virtualize the ANF data into Fabric.
+**Goal**: Virtualize Azure NetApp Files data into Microsoft Fabric OneLake without copying it.
 
-### 4.1 Setup Data Gateway (Required for VNet Access)
-1.  **Create a VM**: Deploy a small Windows VM (Standard_D2s_v3) in the **Same VNet** as your ANF Volume.
-2.  **Install Gateway**:
-    *   RDP into the VM.
-    *   Download [On-premises data gateway (Standard mode)](https://aka.ms/gateway-installer).
-    *   Install > Login with your Azure Work Account > Register New Gateway (Name: `ANF-Gateway`).
-3.  **Check Status**: Ensure it says "Online" in Power Platform Admin Center.
+### 3.1 Deploy On-Premises Data Gateway  (Required for Private S3-Compatible Endpoints)
+1.  Create a **Windows VM** in the same VNet as your Azure NetApp Files volume:
+    *   Size: Standard_D2s_v3 (Recommended)
+2.  RDP into the VM.
+3.  Download and install [On-premises data gateway (Standard mode)](https://aka.ms/gateway-installer).
+4.  Sign in with your Azure Work Account and **Register a new gateway**:
+    *   **Name**: ANF-Gateway
+5.  Verify the gateway shows **Online**.
 
-### 4.2 Create Fabric Workspace
+### 3.2 Create Fabric Workspace
 1.  Go to [app.fabric.microsoft.com](https://app.fabric.microsoft.com).
-2.  **Workspaces** > **+ New workspace**.
-    *   Name: `Financial_RAG_Workshop`.
-    *   **Advanced**: License mode > **Trial** (or Fabric Capacity).
-    *   **Apply**.
+2.  Select **Workspaces** → **+ New workspace**.
+    *   **Name**: `Financial_RAG_Workshop`  
+    *   **License mode**: Trial or Fabric capacity
+3.  Click **Create**.
 
-### 4.3 Create Connection & Shortcut
-1.  **Manage Connections**:
-    *   Gear Icon (Settings) > **Manage connections and gateways**.
-    *   **+ New** > **Amazon S3 Compatible**.
-    *   **Gateway**: Select `ANF-Gateway`.
-    *   **Server**: Your ANF Endpoint URL (IP address usually).
-    *   **Auth**: Key > Paste Access/Secret Keys.
-    *   **Create**.
-2.  **Create Lakehouse**:
-    *   Go to your Workspace > **+ New item** > **Lakehouse** > Name: `FinDataLake`.
-3.  **Create Shortcut**:
-    *   In Lakehouse Explorer > Right-click **Files** > **New shortcut**.
-    *   Source: **Amazon S3 Compatible**.
-    *   Connection: Select the one created in step 4.3.1.
-    *   Bucket: `finance-data` (or volume name).
-    *   Name: `anf_shortcut`.
-    *   **Verify**: Click the shortcut—you should see your folders.
+### 3.3 Create Connection and OneLake Shortcut
+1.  In Fabric, open Settings (gear icon) → Manage connections and gateways.
+2.  Select **+ New connection** → **Amazon S3 Compatible**.
+    *   **Gateway**: `ANF-Gateway`
+    *   **Server**: ANF endpoint IP
+    *   **Authentication**: Access key / Secret key
+3.  Create the connection.
+4.  Create a Lakehouse:
+    *   **Workspace** → **+ New item** → **Lakehouse**
+    *   **Name**: `FinDataLake`
+5.  Create Shortcut:
+    *   Open Lakehouse, right-click **Files**
+    *   Click **New shortcut**
+    *   **Source**: `Amazon S3 Compatible`
+    *   **Connection**: Select the ANF connection created in step 3.3.1
+    *   **Bucket**: `finance-data`
+    *   **Name**: `anf_shortcut`
+6.  Verify folders are visible under the shortcut.
 
 ---
 
-## 5. Module 3: Azure AI Search (Indexing)
+## 4. Index OneLake Data Using Azure AI Search
 
-**Goal**: Index the data from OneLake.
+**Goal**: Make OneLake data searchable and usable for RAG.
 
-### 5.1 Create AI Search Service
-1.  Azure Portal > **Create a resource** > **Azure AI Search**.
-2.  Tier: **Basic** (Required for Semantic Search) or Standard.
-3.  **Enable Semantic Ranker**: Go to the specific setting (usually enabled by default in new Basic+ deployments, but check "Semantic Ranker" blade).
-4.  **Enable Managed Identity**:
-    *   Settings > **Identity** > **System assigned** > **On** > **Save**.
+### 4.1 Create Azure AI Search Service
+1.  Azure portal → **Create a resource** → **Azure AI Search**.
+2.  Select:
+    *   **Tier**: Basic (Required for Semantic Search) or Standard.
+3.  After creation:
+    *   Go to **Identity** → Enable **System‑assigned managed identity**.
 
-### 5.2 Assign Permissions (Crucial Step)
-The Search Service needs permission to read OneLake.
-1.  Go to your Fabric Workspace (`Financial_RAG_Workshop`).
-2.  **Manage Access** (or "Workspace access").
+### 4.2 Assign Permissions
+1.  Open your Fabric workspace (`Financial_RAG_Workshop`).
+2.  Select **Manage access**.
 3.  Add the **Azure AI Search Managed Identity** (search by service name) as a **Member** or **Contributor**.
 
-### 5.3 Import Data
-1.  In Azure AI Search > **Import and vectorizing data**.
-2.  **Source**: **OneLake**.
+### 4.3 Import and Vectorize Data
+1.  Open Azure AI Search → **Import and vectorizing data**.
+2.  **Source**: OneLake (Microsoft Fabric).
 3.  **Connection**:
     *   Select "Microsoft Fabric".
-    *   Choose Workspace (`Financial_RAG_Workshop`) > Lakehouse (`FinDataLake`).
-    *   Path: `Files/anf_shortcut`.
-4.  **Vectorization**:
+    *   **Workspace** (`Financial_RAG_Workshop`)
+    *   **Lakehouse** (`FinDataLake`).
+    *   **Path**: `Files/anf_shortcut`.
+4.  Configure Vectorization
     *   Kind: **Azure OpenAI**.
     *   *Dependency*: Use the Azure OpenAI resource created in Module 4 (or create one now).
     *   Select the Embedding model.
-5.  **Index Settings**:
+5.  Configure Index Settings:
     *   **Content**: Searchable.
     *   **Metadata_storage_path**: **Retrievable** (Must be checked!).
-6.  **Create Indexer**: Run it.
+6.  Create and run the indexer.
 
 ---
 
-## 6. Module 4: Azure AI Foundry (Consumption)
+## 5. Connect OneLake to Azure AI Foundry
 
-**Goal**: Provision the AI Platform and Create an Agent.
+**Goal**: Enable Foundry to ground agents on indexed enterprise data.
 
-### 6.1 Create Azure AI Services Resource (The "Root" Resource)
-*Before creating a Hub, you should create the underlying AI Service to ensure you have full control over the region and pricing tier.*
-
+### 5.1 Create Azure AI Services Resource (The "Root" Resource)
 1.  **Azure Portal** > **Create a resource** > **Azure AI services** (Multi-service account).
-2.  **Create**:
-    *   Name: `Workshop-AI-Services`.
-    *   Region: **East US 2** (or `Sweden Central`, `West US 3` - regions with GPT-4o).
-    *   Pricing Tier: **Standard S0**.
+2.  **Configure**:
+    *   **Name**: `Workshop-AI-Services`.
+    *   **Region**: **East US 2** (or `Sweden Central`, `West US 3` - regions with GPT-4o).
+    *   **Pricing Tier**: Standard S0.
 3.  **Deploy Model**:
     *   Go to **Model deployments** (in the resource blade).
     *   Click **Manage Deployments** (opens Azure OpenAI Studio).
     *   **Deploy**: `gpt-4o` (or `gpt-4`). Name it `gpt-4o`.
-    *   **Deploy**: `text-embedding-3-small`. Name it `text-embedding`.
+    *   **Deploy**: `text-embedding-3-small`. Name it `text-embedding-3-small`.
 
-### 6.2 Assign Your Identity Permissions
-*You cannot use the AI Foundry portal effectively without permissions on the resource.*
+### 5.2 Assign User Permissions
 
 1.  Go to the `Workshop-AI-Services` resource > **Access control (IAM)**.
 2.  **Add role assignment**.
-3.  Role: **Cognitive Services OpenAI User** (allows you to run inference/chat).
-4.  Members: Select **Your User Account**.
-5.  **Review + assign**.
+    *   Role: **Cognitive Services OpenAI User** (allows you to run inference/chat).
+    *   Members: Select **Your User Account**.
+3.  **Review + assign**.
 
-### 6.3 Create AI Hub & Project
+### 5.3 Create Foundry Project
 1.  Go to [ai.azure.com](https://ai.azure.com).
-2.  **+ Create Project**.
+2.  Click **+ Create Project**.
 3.  **Project Details**:
     *   Name: `Finance-RAG-Project`.
     *   **Hub**: Click "Create new hub".
@@ -317,19 +264,25 @@ The Search Service needs permission to read OneLake.
     *   **Resource Group**: Use your existing one.
 4.  **Connect Resources**:
     *   **Azure OpenAI**: Select `Workshop-AI-Services`.
-    *   **Azure AI Search**: Select the service created in Module 3.
+    *   **Azure AI Search**: Select the service created in Step 4.
 5.  **Create**.
 
-### 6.4 Configure Data Source (The RAG Link)
+---
+
+## 6. Run and Validate a Grounded Agent
+
+**Goal**: Confirm the agent answers questions using ANF‑hosted data.
+
+### 6.1 Configure Data Source (The RAG Link)
 1.  In your Project > Left Menu > **Data** (or "Indexes").
 2.  **+ New connection** > **Azure AI Search**.
-3.  System will detect your connected service. Select the **Index** created in Module 3.
+3.  System will detect your connected service. Select the **Index** created in Step 4.
 
-### 6.5 Create & Test Agent
-1.  Left Menu > **Agents**.
-2.  **Deploy Model**: Select the `gpt-4o` deployment you created in step 6.1.
-3.  **Add Knowledge**: Select the Search Index connection.
-4.  **System Instruction**:
+### 6.2 Create & Test Agent
+1.  Left Menu > **Agents**, create agent
+    *   **Deploy Model**: Select the `gpt-4o` deployment you created in step 5.1.
+    *   **Add Knowledge**: Select the Search Index connection.
+4.  **System Prompt**:
     ```text
     You are a Financial Auditor. 
     Use the attached financial data to answer questions. 
