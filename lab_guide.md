@@ -131,7 +131,7 @@ This lab is designed to be approachable for customers and partners with general 
     *   Click **+ Create or update bucket**.
     *   Name: `finance-data`.
     *   Path: `/` (Root or applicable path).
-    *   Username: (reached out to Sean to request clarification on username vs UserID / GroupID)
+    *   Username: (Clarify username vs UserID / GroupID)
     *   Permissions: `Read and Write`
     *   Click **Save**.
     *   **Upload Certificate**: Upload the `cert.pem` file you generated.
