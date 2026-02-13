@@ -71,18 +71,18 @@ This lab is designed to be approachable for customers and partners with general 
     *   Sign in with your Azure work account.
 2.  **Verify Subscription Role**:
     *   In the Azure portal, search for **Subscriptions**.
-    *   Select the subscription you will use for the lab.
-    *   Select **Access control (IAM)**.
+    *   In the **Subscriptions** blade, select the subscription you will use for the lab.
+    *   In the left hand menu, select **Access control (IAM)**.
     *   Confirm your user has **Owner** or **Contributor + User Access Administrator**.
 3.  **Register Resource Providers**:
-    *   From your subscription page, select Resource providers.
-    *   Ensure the following providers are Registered:
+    *   On the **Subscriptions** blade, under **Settings*, select **Resource providers**.
+    *   Confirm the following providers are Registered:
         *   Microsoft.NetApp
         *   Microsoft.Search
         *   Microsoft.CognitiveServices
         *   Microsoft.MachineLearningServices (required for Azure AI Foundry)
         *   Microsoft.Fabric (required for OneLake / Fabric)
-    *   If any show **Not registered**, select the resource provider and click **Register**.
+    *   If any show **Not registered**, select the the resource provider and click **Register**.
 
 ## 2. Configure Azure NetApp Files
 **Goal**: Create an Azure NetApp Files volume and enable S3‑compatible (Object REST API) access.
@@ -92,43 +92,48 @@ This lab is designed to be approachable for customers and partners with general 
 ### 2.1 Create NetApp Account and Capacity Pool
 
 1. In the Azure portal, search for **Azure NetApp Files**.
-2. Click **+ Create**.
-    *   **Name**: Workshop-NetApp-Account
+2. In the Azure NetApp Files blade, click **+ Create**.
+    *   **Name**: `Workshop-NetApp-Account`
+    *   **Resource group**: <Resource_Group>
     *   **Region**: Choose a supported region (e.g., East US)
-3. After creation, open the NetApp account.
-4. Select **Capacity pools** → **+ Add pool**.
-    *   **Name**: Workshop-Pool
-    *   **Service level**: Standard
+3. Click **Create**.
+4. When the account is created, open the NetApp account.
+5. In the **NetApp account** blade, select **Capacity pools**, and then click **+ Add pool**.
+6. Configure the Capacity pool:
+    *   **Pool name**: `Workshop-Pool`
+    *   **Service level**: `Standard`
     *   **Size**: 1 TiB (minimum)
-5. Click **Create**.
+7. Click **Create**.
 
 ### 2.2 Create a Volume
 
-1. In the NetApp account, select Volumes → + Add volume.
+1. In the **NetApp account** blade, select **Volumes**, and then click **+ Add volume**.
 2. Configure the volume:
-    *   **Name**: anf-finance-vol
+    *   **Name**: `anf-finance-vol`
+    *   **Capacity pool**: Select the capacity pool created in step 2.1.
     *   **Quota**: 100 GiB
     *   **Virtual network**: Select a VNet
-    *   **Subnet**: Select a delegated subnet (Microsoft.NetApp/volumes)
+    *   **Delegated subnet**: Select a delegated subnet (<subnet_name> (10.X.X.X/XX))
     *   **Protocol**: NFS (NFSv3 recommended for this lab)
-3. Click **Review + Create** → **Create**.
+3. Click **Review + Create**, and then click **Create**.
 
 ### 2.3 Enable Object (S3‑Compatible) Access
 
-Note: Object REST API for Azure NetApp Files is in Public Preview. Ensure your subscription is approved.
+**Note**: Object REST API for Azure NetApp Files is in Public Preview. Ensure your subscription is approved.
 
 1. Generate a Certificate (should this be uisng the portal?)
     *   Open a terminal/command prompt.
     *   Run: `openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes`
     *   Save `cert.pem`.
-2. Enable Object Access
-    *   In the Azure portal, open your volume `anf-finance-vol`.
-    *   Navigate to Object access / Buckets (blade name may vary).
-    *   If prompted, click **Enable Object Access**.
-3. Create a Bucket
-    *   Click **+ Add Bucket**.
+2. Create a Bucket
+    *   In the **NetApp account** blade, select your volume `anf-finance-vol`.
+    *   Under **Storage service**, click **Buckets**.
+    *   Click **+ Create or update bucket**.
     *   Name: `finance-data`.
     *   Path: `/` (Root or applicable path).
+    *   Username: (reached out to Sean to request clarification on username vs UserID / GroupID)
+    *   Permissions: `Read and Write`
+    *   Click **Save**.
     *   **Upload Certificate**: Upload the `cert.pem` file you generated.
     *   Click **Create**.
 4. Capture Credentials
