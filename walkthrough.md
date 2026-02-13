@@ -275,5 +275,5 @@ This pattern scales from workshops to real enterprise deployments, while minimiz
 
 ## How to use this
 1.  **Distribute**: Send the `lab_guide.md` and `test_data` folder to your workshop participants.
-2.  **Pre-Flight**: ensure their subscriptions are whitelisted for the ANF Object Access preview interactively.
-3.  **Run**: Follow the guide Module-by-Module. The new "Practical Testing" section in Module 5 provides a strong "wow" moment for the demo.
+2.  **Pre-Flight**: ensure their subscriptions are whitelisted for the Azure NetApp Files Object REST API Access preview interactively.
+3.  **Run**: Follow the guide step-by-step. The new "Run and Validate a Grounded Agent" section in Section 6 provides a strong "wow" moment for the demo.
