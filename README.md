@@ -20,10 +20,14 @@ The solution leverages the **Azure NetApp Files object REST API** to expose file
 4.  **Orchestration**: Azure AI Foundry agents consuming indexed content for retrieval‑augmented generation
 
 ## Repository Contents
-*   **`lab_guide.md`**: The step-by-step instructions for the workshop.
-*   **`test_data/`**: Dummy financial data (Invoices and CSV logs) for testing.
-*   **`generate_data.py`**: Scripts used to generate the test data.
-
+This repository contains all assets required to complete the end‑to‑end workshop and understand the solution architecture being demonstrated.
+*   **`lab_guide.md`**: The authoritative, step‑by‑step guide for the workshop.
+Follow these steps to configure Azure NetApp Files, create a OneLake shortcut, index data with Azure AI Search, and build a grounded AI agent in Azure AI Foundry.
+*   **`walkthrough.md`**: A narrative and talk track that follows the lab steps, explaining why each step exists and how to position the solution during a live workshop or customer discussion. Use this file to guide presentations and discussions while attendees follow the hands‑on instructions in lab_guide.md.
+*   **`test_data/`**: Sample unstructured financial data (invoices and CSV logs) used throughout the lab.
+This data represents realistic enterprise file‑based content and is intentionally stored on Azure NetApp Files to demonstrate AI and analytics operating on file data in place.
+*   **`generate_data.py`**: A helper script used to generate the sample data included in the test_data directory.
+This script is provided for transparency and repeatability; it is not required to run the workshop.
   
 <img width="1654" height="929" alt="image" src="https://github.com/user-attachments/assets/5ee874f5-fe55-4bbf-ae2a-2b1d06a5b21c" />
 
