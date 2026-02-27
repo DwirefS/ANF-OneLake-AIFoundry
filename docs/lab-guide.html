@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Guide | Zero-Copy RAG Workshop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azure-blue: #0078D4;
+            --azure-light: #50A0E6;
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2233;
+            --bg-card-hover: #1f2a3d;
+            --text-primary: #f0f4f8;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #1e293b;
+            --gradient-2: linear-gradient(135deg, #0078D4 0%, #50A0E6 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+        }
+
+        .topbar-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+
+        .topbar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .topbar a:hover { color: var(--text-primary); }
+
+        .topbar-brand {
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Content */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 7rem 2rem 4rem;
+        }
+
+        .page-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 120, 212, 0.1);
+            border: 1px solid rgba(0, 120, 212, 0.25);
+            padding: 0.35rem 1rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--azure-light);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+        }
+
+        .page-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc h2 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .toc ol {
+            list-style: none;
+            counter-reset: toc;
+        }
+
+        .toc ol li {
+            counter-increment: toc;
+            margin-bottom: 0.5rem;
+        }
+
+        .toc ol li a {
+            color: var(--azure-light);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .toc ol li a:hover { color: var(--text-primary); }
+
+        .toc ol li a::before {
+            content: counter(toc) ". ";
+            color: var(--text-muted);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Section styling */
+        .lab-section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 5rem;
+        }
+
+        .lab-section > h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            letter-spacing: -0.02em;
+        }
+
+        .lab-section > h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            color: var(--azure-light);
+        }
+
+        .lab-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .lab-section strong {
+            color: var(--text-primary);
+        }
+
+        .lab-section ul, .lab-section ol {
+            color: var(--text-secondary);
+            margin: 0.75rem 0 1.5rem 1.5rem;
+        }
+
+        .lab-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .lab-section li strong {
+            color: var(--text-primary);
+        }
+
+        /* Info box */
+        .info-box {
+            background: rgba(0, 120, 212, 0.06);
+            border-left: 3px solid var(--azure-blue);
+            border-radius: 0 12px 12px 0;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-box strong {
+            color: var(--azure-light);
+        }
+
+        .warn-box {
+            background: rgba(245, 158, 11, 0.06);
+            border-left: 3px solid #f59e0b;
+            border-radius: 0 12px 12px 0;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .warn-box strong {
+            color: #fbbf24;
+        }
+
+        /* Code */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.06);
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #e2e8f0;
+        }
+
+        pre {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: 0.85rem;
+            line-height: 1.7;
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 3rem 0;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--azure-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 2rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--text-primary); }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        footer a { color: var(--azure-light); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-inner">
+        <a href="index.html" class="topbar-brand">&larr; Zero-Copy RAG Workshop</a>
+        <a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry" target="_blank">GitHub</a>
+    </div>
+</div>
+
+<div class="content">
+    <div class="page-badge">Hands-On Lab</div>
+    <h1>Lab Guide</h1>
+    <p class="page-desc">Step-by-step instructions to build a complete Zero-Copy RAG pipeline from Azure NetApp Files through to a grounded AI Foundry agent.</p>
+
+    <div class="toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#section-1">Validate Azure Subscription Requirements</a></li>
+            <li><a href="#section-2">Configure Azure NetApp Files</a></li>
+            <li><a href="#section-3">Create a OneLake Shortcut to Azure NetApp Files</a></li>
+            <li><a href="#section-4">Index OneLake Data Using Azure AI Search</a></li>
+            <li><a href="#section-5">Connect OneLake to Azure AI Foundry</a></li>
+            <li><a href="#section-6">Run and Validate a Grounded Agent</a></li>
+            <li><a href="#section-7">Troubleshooting</a></li>
+        </ol>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="lab-section" id="section-1">
+        <h2>1. Validate Azure Subscription Requirements</h2>
+        <p><strong>Goal:</strong> Ensure your Azure subscription is ready to run the lab without permission or provider issues.</p>
+
+        <ol>
+            <li><strong>Login</strong> &mdash; Open <code>https://portal.azure.com</code> and sign in with your Azure work account.</li>
+            <li><strong>Verify Subscription Role</strong>
+                <ul>
+                    <li>Search for <strong>Subscriptions</strong> in the portal.</li>
+                    <li>Select the subscription you will use for the lab.</li>
+                    <li>Go to <strong>Access control (IAM)</strong>.</li>
+                    <li>Confirm your user has <strong>Owner</strong> or <strong>Contributor + User Access Administrator</strong>.</li>
+                </ul>
+            </li>
+            <li><strong>Register Resource Providers</strong>
+                <ul>
+                    <li>On the Subscriptions blade, under Settings, select <strong>Resource providers</strong>.</li>
+                    <li>Confirm the following are registered:
+                        <ul>
+                            <li><code>Microsoft.NetApp</code></li>
+                            <li><code>Microsoft.Search</code></li>
+                            <li><code>Microsoft.CognitiveServices</code></li>
+                            <li><code>Microsoft.MachineLearningServices</code></li>
+                            <li><code>Microsoft.Fabric</code></li>
+                        </ul>
+                    </li>
+                    <li>If any show <em>Not registered</em>, select the provider and click <strong>Register</strong>.</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 2 -->
+    <div class="lab-section" id="section-2">
+        <h2>2. Configure Azure NetApp Files</h2>
+        <p><strong>Goal:</strong> Create an Azure NetApp Files volume and enable S3-compatible (Object REST API) access.</p>
+
+        <div class="warn-box">
+            <strong>Preview Requirement:</strong> The Object REST API for Azure NetApp Files is in Public Preview. Ensure your subscription is whitelisted before proceeding.
+        </div>
+
+        <h3>2.1 Create NetApp Account and Capacity Pool</h3>
+        <ol>
+            <li>In the Azure portal, search for <strong>Azure NetApp Files</strong>.</li>
+            <li>Click <strong>+ Create</strong>.
+                <ul>
+                    <li><strong>Name:</strong> <code>Workshop-NetApp-Account</code></li>
+                    <li><strong>Resource group:</strong> Your resource group</li>
+                    <li><strong>Region:</strong> Choose a supported region (e.g., East US)</li>
+                </ul>
+            </li>
+            <li>Click <strong>Create</strong>.</li>
+            <li>Open the NetApp account, select <strong>Capacity pools</strong>, then click <strong>+ Add pool</strong>.
+                <ul>
+                    <li><strong>Pool name:</strong> <code>Workshop-Pool</code></li>
+                    <li><strong>Service level:</strong> Standard</li>
+                    <li><strong>Size:</strong> 1 TiB (minimum)</li>
+                </ul>
+            </li>
+            <li>Click <strong>Create</strong>.</li>
+        </ol>
+
+        <h3>2.2 Create a Volume</h3>
+        <ol>
+            <li>Select <strong>Volumes</strong>, then click <strong>+ Add volume</strong>.
+                <ul>
+                    <li><strong>Name:</strong> <code>anf-finance-vol</code></li>
+                    <li><strong>Capacity pool:</strong> Select the pool from 2.1</li>
+                    <li><strong>Quota:</strong> 100 GiB</li>
+                    <li><strong>Virtual network &amp; delegated subnet:</strong> Select your VNet</li>
+                    <li><strong>Protocol:</strong> NFS (NFSv3 recommended)</li>
+                </ul>
+            </li>
+            <li>Click <strong>Review + Create</strong>, then <strong>Create</strong>.</li>
+        </ol>
+
+        <h3>2.3 Enable Object (S3-Compatible) Access</h3>
+        <ol>
+            <li><strong>Generate a certificate:</strong>
+                <pre><code>openssl req -x509 -newkey rsa:4096 -keyout private.key -out cert.pem -days 365 -nodes</code></pre>
+            </li>
+            <li><strong>Create a Bucket:</strong>
+                <ul>
+                    <li>In the volume blade, under <strong>Storage service</strong>, click <strong>Buckets</strong>.</li>
+                    <li>Click <strong>+ Create or update bucket</strong>.</li>
+                    <li><strong>Name:</strong> <code>finance-data</code></li>
+                    <li><strong>Path:</strong> <code>/</code></li>
+                    <li><strong>Permissions:</strong> Read and Write</li>
+                    <li>Upload the <code>cert.pem</code> file.</li>
+                </ul>
+            </li>
+            <li><strong>Capture Credentials:</strong> Copy and save the Endpoint URL, Access Key, and Secret Key.</li>
+        </ol>
+
+        <h3>2.4 Download Lab Data</h3>
+        <p>Download the <code>test_data</code> folder from this repository to your local machine.</p>
+
+        <h3>2.5 Upload Lab Data</h3>
+        <ol>
+            <li>Install a client such as <strong>Cyberduck</strong> or <strong>S3 Browser</strong>.</li>
+            <li>Create a new S3 connection using your ANF endpoint, access key, and secret key. Enable <strong>path-style addressing</strong> if prompted.</li>
+            <li>Upload the <code>invoices/</code> and <code>financial_statements/</code> folders to the bucket root.</li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 3 -->
+    <div class="lab-section" id="section-3">
+        <h2>3. Create a OneLake Shortcut to Azure NetApp Files</h2>
+        <p><strong>Goal:</strong> Virtualize Azure NetApp Files data into Microsoft Fabric OneLake without copying it.</p>
+
+        <h3>3.1 Deploy On-Premises Data Gateway</h3>
+        <div class="info-box">
+            <strong>Note:</strong> This gateway is required by Microsoft Fabric when accessing private or VNet-isolated S3-compatible endpoints. Azure NetApp Files itself does not require a gateway.
+        </div>
+        <ol>
+            <li>Create a <strong>Windows VM</strong> in the same VNet as your ANF volume (Standard_D2s_v3 recommended).</li>
+            <li>RDP into the VM.</li>
+            <li>Download and install the <strong>On-premises data gateway</strong> (Standard mode).</li>
+            <li>Sign in and register a new gateway named <code>ANF-Gateway</code>.</li>
+            <li>Verify the gateway shows <strong>Online</strong>.</li>
+        </ol>
+
+        <h3>3.2 Create Fabric Workspace</h3>
+        <ol>
+            <li>Go to <code>app.fabric.microsoft.com</code>.</li>
+            <li>Select <strong>Workspaces</strong> &rarr; <strong>+ New workspace</strong>.
+                <ul>
+                    <li><strong>Name:</strong> <code>Financial_RAG_Workshop</code></li>
+                    <li><strong>License mode:</strong> Trial or Fabric capacity</li>
+                </ul>
+            </li>
+            <li>Click <strong>Create</strong>.</li>
+        </ol>
+
+        <h3>3.3 Create Connection and OneLake Shortcut</h3>
+        <ol>
+            <li>In Fabric, open <strong>Settings</strong> &rarr; <strong>Manage connections and gateways</strong>.</li>
+            <li>Select <strong>+ New connection</strong> &rarr; <strong>Amazon S3 Compatible</strong>.
+                <ul>
+                    <li><strong>Gateway:</strong> <code>ANF-Gateway</code></li>
+                    <li><strong>Server:</strong> ANF endpoint IP</li>
+                    <li><strong>Authentication:</strong> Access key / Secret key</li>
+                </ul>
+            </li>
+            <li>Create a <strong>Lakehouse</strong>:
+                <ul>
+                    <li><strong>Workspace</strong> &rarr; <strong>+ New item</strong> &rarr; <strong>Lakehouse</strong></li>
+                    <li><strong>Name:</strong> <code>FinDataLake</code></li>
+                </ul>
+            </li>
+            <li>Create the <strong>Shortcut</strong>:
+                <ul>
+                    <li>Open Lakehouse, right-click <strong>Files</strong>, click <strong>New shortcut</strong>.</li>
+                    <li><strong>Source:</strong> Amazon S3 Compatible</li>
+                    <li><strong>Connection:</strong> Select the ANF connection</li>
+                    <li><strong>Bucket:</strong> <code>finance-data</code></li>
+                    <li><strong>Name:</strong> <code>anf_shortcut</code></li>
+                </ul>
+            </li>
+            <li>Verify folders are visible under the shortcut.</li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 4 -->
+    <div class="lab-section" id="section-4">
+        <h2>4. Index OneLake Data Using Azure AI Search</h2>
+        <p><strong>Goal:</strong> Make OneLake data searchable and usable for RAG.</p>
+
+        <h3>4.1 Create Azure AI Search Service</h3>
+        <ol>
+            <li>In the Azure portal &rarr; <strong>Create a resource</strong> &rarr; <strong>Azure AI Search</strong>.</li>
+            <li>Select <strong>Basic</strong> tier (required for Semantic Search) or Standard.</li>
+            <li>After creation, go to <strong>Identity</strong> &rarr; Enable <strong>System-assigned managed identity</strong>.</li>
+        </ol>
+
+        <h3>4.2 Assign Permissions</h3>
+        <ol>
+            <li>Open your Fabric workspace (<code>Financial_RAG_Workshop</code>).</li>
+            <li>Select <strong>Manage access</strong>.</li>
+            <li>Add the Azure AI Search Managed Identity (search by service name) as a <strong>Member</strong> or <strong>Contributor</strong>.</li>
+        </ol>
+
+        <div class="warn-box">
+            <strong>Workshop Guardrails:</strong>
+            <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                <li>Avoid Microsoft Purview sensitivity labels on the Lakehouse or files.</li>
+                <li>Use reasonably sized text-based documents (PDF, TXT, CSV).</li>
+            </ul>
+        </div>
+
+        <h3>4.3 Import and Vectorize Data</h3>
+        <ol>
+            <li>Open Azure AI Search &rarr; <strong>Import and vectorize data</strong>.</li>
+            <li><strong>Source:</strong> OneLake (Microsoft Fabric).</li>
+            <li><strong>Connection:</strong> Select your workspace (<code>Financial_RAG_Workshop</code>), Lakehouse (<code>FinDataLake</code>), Path: <code>Files/anf_shortcut</code>.</li>
+            <li><strong>Vectorization:</strong> Azure OpenAI &mdash; select your embedding model.</li>
+            <li><strong>Index Settings:</strong> Content: Searchable, Metadata_storage_path: Retrievable (must be checked).</li>
+            <li>Create and run the indexer.</li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 5 -->
+    <div class="lab-section" id="section-5">
+        <h2>5. Connect OneLake to Azure AI Foundry</h2>
+        <p><strong>Goal:</strong> Enable Foundry to ground agents on indexed enterprise data.</p>
+
+        <h3>5.1 Create Azure AI Services Resource</h3>
+        <ol>
+            <li>Azure Portal &rarr; <strong>Create a resource</strong> &rarr; <strong>Azure AI services</strong> (Multi-service account).
+                <ul>
+                    <li><strong>Name:</strong> <code>Workshop-AI-Services</code></li>
+                    <li><strong>Region:</strong> East US 2 (or Sweden Central, West US 3)</li>
+                    <li><strong>Pricing Tier:</strong> Standard S0</li>
+                </ul>
+            </li>
+            <li><strong>Deploy Models:</strong>
+                <ul>
+                    <li>Go to <strong>Model deployments</strong> &rarr; <strong>Manage Deployments</strong>.</li>
+                    <li>Deploy <code>gpt-4o</code> (name it <code>gpt-4o</code>).</li>
+                    <li>Deploy <code>text-embedding-3-small</code> (name it <code>text-embedding-3-small</code>).</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>5.2 Assign User Permissions</h3>
+        <ol>
+            <li>Go to <code>Workshop-AI-Services</code> &rarr; <strong>Access control (IAM)</strong>.</li>
+            <li><strong>Add role assignment:</strong>
+                <ul>
+                    <li><strong>Role:</strong> Cognitive Services OpenAI User</li>
+                    <li><strong>Members:</strong> Select your user account</li>
+                </ul>
+            </li>
+            <li>Click <strong>Review + assign</strong>.</li>
+        </ol>
+
+        <h3>5.3 Create Foundry Project</h3>
+        <ol>
+            <li>Go to <code>ai.azure.com</code>.</li>
+            <li>Click <strong>+ Create Project</strong>.
+                <ul>
+                    <li><strong>Name:</strong> <code>Finance-RAG-Project</code></li>
+                    <li><strong>Hub:</strong> Create new hub named <code>Finance-Hub</code></li>
+                    <li><strong>Resource Group:</strong> Use your existing one</li>
+                </ul>
+            </li>
+            <li><strong>Connect Resources:</strong>
+                <ul>
+                    <li><strong>Azure OpenAI:</strong> Select <code>Workshop-AI-Services</code></li>
+                    <li><strong>Azure AI Search:</strong> Select the service from Step 4</li>
+                </ul>
+            </li>
+            <li>Click <strong>Create</strong>.</li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 6 -->
+    <div class="lab-section" id="section-6">
+        <h2>6. Run and Validate a Grounded Agent</h2>
+        <p><strong>Goal:</strong> Confirm the agent answers questions using ANF-hosted data.</p>
+
+        <h3>6.1 Configure Data Source</h3>
+        <ol>
+            <li>In your Project &rarr; Left Menu &rarr; <strong>Data</strong> (or "Indexes").</li>
+            <li><strong>+ New connection</strong> &rarr; <strong>Azure AI Search</strong>.</li>
+            <li>Select the <strong>Index</strong> created in Step 4.</li>
+        </ol>
+
+        <h3>6.2 Create &amp; Test Agent</h3>
+        <ol>
+            <li>Go to <strong>Agents</strong>, create a new agent.
+                <ul>
+                    <li><strong>Model:</strong> Select the <code>gpt-4o</code> deployment.</li>
+                    <li><strong>Knowledge:</strong> Select the Search Index connection.</li>
+                </ul>
+            </li>
+            <li><strong>System Prompt:</strong>
+                <pre><code>You are a Financial Auditor.
+Use the attached financial data to answer questions.
+Always cite the document name.
+If data is in a CSV, calculate totals by summing rows.</code></pre>
+            </li>
+            <li><strong>Test with example queries:</strong>
+                <ul>
+                    <li><em>"What is the total spend for vendor 'OfficeMax'?"</em></li>
+                    <li><em>"Show me all transactions from Q1 2025."</em></li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 7 -->
+    <div class="lab-section" id="section-7">
+        <h2>7. Troubleshooting</h2>
+        <ul>
+            <li><strong>Gateway Error:</strong> Ensure the gateway VM has outbound 443 access to the ANF IP.</li>
+            <li><strong>OneLake Shortcut Empty:</strong> Verify the bucket name in the shortcut settings matches the ANF bucket exactly.</li>
+            <li><strong>Indexer Error (403):</strong> Re-check Step 4.2. The Search Service Managed Identity must have permission on the Fabric workspace.</li>
+            <li><strong>Agent "I don't know":</strong> Check "Strictness" (set to 3) and ensure the Indexer ran successfully (document count &gt; 0).</li>
+            <li><strong>Permissions Error in Foundry:</strong> Ensure you assigned yourself <strong>Cognitive Services OpenAI User</strong> in Step 5.2.</li>
+        </ul>
+    </div>
+
+    <a href="index.html" class="back-link">&larr; Back to Workshop Home</a>
+</div>
+
+<footer>
+    <p>Licensed under <a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry/blob/main/LICENSE">Apache License 2.0</a> &middot; <a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry">GitHub Repository</a></p>
+</footer>
+
+</body>
+</html>

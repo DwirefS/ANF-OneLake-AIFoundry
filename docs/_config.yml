@@ -1,0 +1,4 @@
+title: "Zero-Copy RAG Workshop"
+description: "Build RAG applications without data duplication using Azure NetApp Files, Microsoft Fabric OneLake, and Azure AI Foundry"
+url: "https://dwirefs.github.io"
+baseurl: "/ANF-OneLake-AIFoundry"
