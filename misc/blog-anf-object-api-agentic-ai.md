@@ -356,60 +356,71 @@ When you are building production AI systems that serve real users and real busin
 
 ### Sub-Millisecond Latency
 
-ANF delivers sub-millisecond latency for read operations. When an AI agent calls `GetObject` to read a document — whether through an MCP server, a LangChain loader, or a custom function tool — the storage response is measured in fractions of a millisecond. For agentic RAG workflows where the agent makes multiple sequential reads (reading one file, reasoning, then reading another), this latency advantage compounds. Each agent "thinking step" that requires data access completes faster, leading to noticeably better end-user response times.
+ANF delivers sub-millisecond latency for read operations. In the SPECstorage Solution 2020 benchmark, a single ANF large volume sustained sub-millisecond latency throughout test iterations, only breaching 1 ms at peak load. When an AI agent calls `GetObject` to read a document — whether through an MCP server, a LangChain loader, or a custom function tool — the storage response is measured in fractions of a millisecond. For agentic RAG workflows where the agent makes multiple sequential reads (reading one file, reasoning, then reading another), this latency advantage compounds. Each agent "thinking step" that requires data access completes faster, leading to noticeably better end-user response times.
 
 ### Throughput That Scales with AI Workloads
 
-ANF supports up to 4.5 GiB/s throughput per volume. When you have an AI Search indexer processing hundreds of documents through a Document Intelligence pipeline, or a Spark job preprocessing thousands of files for embedding, throughput matters. ANF delivers it without throttling, without provisioned capacity units, without worrying about request rate limits that plague object storage services.
+ANF large volumes can deliver up to **12,800 MiB/s (12.5 GiB/s)** of throughput — verified in benchmark testing where sequential reads hit 12,761 MiB/s from a single volume. Regular volumes support up to approximately 4,500 MiB/s. When you have an AI Search indexer processing hundreds of documents through a Document Intelligence pipeline, or a Spark job preprocessing thousands of files for embedding, throughput matters. ANF delivers it without throttling, without provisioned capacity units, without worrying about request rate limits that plague object storage services.
+
+And the IOPS numbers back this up: large volumes have been benchmarked at **792,046 operations per second** at peak, with EDA workloads hitting 826,000 IOPS. For concurrent multi-agent architectures where several agents are reading files simultaneously, this means zero contention and no performance degradation.
 
 ### Enterprise Data Protection — Snapshots That Do Not Lie
 
-This is where ANF fundamentally changes the conversation about AI data governance. ANF supports up to 255 snapshots per volume, and they are:
+This is where ANF fundamentally changes the conversation about AI data governance. ANF supports up to **255 snapshots per volume**, and they are:
 
-- **Instantaneous**: Created in seconds regardless of volume size
-- **Space-efficient**: Copy-on-write — only changed blocks consume additional space
-- **Consistent**: Point-in-time consistent views of your data
+- **Near-instantaneous**: Created in seconds regardless of volume size — pointer-based, not data-copy
+- **Space-efficient**: Copy-on-write architecture — only changed blocks consume additional space. Typical daily consumption is 1-5% of used capacity
+- **Policy-driven**: Hourly, daily, weekly, and monthly snapshot schedules with configurable retention
+- **Consistent**: Point-in-time consistent views of your entire data set
 
 Why does this matter for AI? Consider this scenario: your AI agent is grounded on financial data. Regulatory auditors ask, "What data was the agent using when it generated that report on March 15th?" With ANF snapshots, you can answer definitively. You can even mount a snapshot as a read-only volume, point your indexer at it, and reproduce exactly what the agent would have said on any given date.
 
 This is AI reproducibility and auditability built into the storage layer. No application-level versioning needed. No separate metadata databases to maintain.
 
+Beyond snapshots, ANF offers a **fully managed backup service** for long-term retention and compliance. Backups are incremental (only changed blocks are transferred), stored on zone-redundant storage by default, and each backup is individually restorable — no need to replay a chain of incrementals. For organizations in regulated industries building AI on financial, healthcare, or legal data, this is table stakes.
+
 ### Cross-Region Replication for Disaster Recovery
 
-ANF supports cross-region replication (CRR), asynchronously replicating volume data to a paired Azure region. For AI workloads, this means:
+ANF supports **cross-region replication (CRR)**, asynchronously replicating volume data to a paired Azure region using snapshot-based technology — only changed blocks cross the wire, encrypted with TLS 1.2 AES-256 GCM. For AI workloads, this means:
 
 - Your RAG knowledge base survives a regional outage
 - You can fail over the AI pipeline to a secondary region
 - RPO (Recovery Point Objective) in minutes, not hours
 
+What is even more impressive: ANF now supports **cross-zone-region replication (CZRR)**, allowing you to create two replication relationships on a single source volume — one cross-zone and one cross-region simultaneously. That is multi-layered protection against both zone-level and regional failures.
+
 If your AI agent is business-critical — and increasingly, they are — disaster recovery for the underlying data is not optional. ANF provides it at the storage layer, transparent to the AI services above.
 
 ### Availability Zones and High Availability
 
-ANF supports availability zone placement, ensuring your volumes are deployed in specific zones for HA architectures. Combined with zone-redundant configurations, this means your AI data source stays available even during datacenter-level failures within a region.
+ANF supports **availability zone placement** and offers the new **Elastic zone-redundant service level**, which automatically replicates data across three or more availability zones within a region. If a zone goes down, traffic is automatically routed to the failover zone — no customer intervention required. The mount target and service endpoint stay the same. Your AI pipeline does not even notice.
+
+For AI workloads serving real-time business decisions, this kind of transparent failover is critical. An AI agent that goes down because its data source is unavailable is worse than no AI agent at all.
 
 ### Encryption — At Rest and In Transit
 
-- **At rest**: ANF volumes are encrypted by default using Microsoft-managed keys. Customer-managed keys (CMK) via Azure Key Vault are also supported for organizations that require full key control.
-- **In transit**: NFS Kerberos encryption and SMB encryption protect data on the wire. The Object REST API uses HTTPS (TLS) for all communications.
+- **At rest**: All ANF volumes are encrypted by default with AES-256 (XTS-AES-256 per volume, FIPS 140-2 compliant). For organizations requiring full key control, ANF supports **customer-managed keys (CMK)** via Azure Key Vault, and even **customer-managed keys with Managed HSM** (FIPS 140-2 Level 3). For the most sensitive workloads, **double encryption at rest** adds a hardware-based encryption layer on top of the software layer.
+- **In transit**: SMB encryption via AES-GCM (SMB 3.1.1), NFSv4.1 Kerberos encryption (krb5p mode with AES-256-GCM), and the Object REST API uses HTTPS (TLS) for all communications. Replication traffic is encrypted with TLS 1.2 AES-256 GCM, with underlying Azure MACsec encryption on all Azure traffic.
 
-For AI workloads processing sensitive enterprise data — financial records, healthcare documents, legal contracts — encryption is non-negotiable. ANF provides it without performance compromise.
+For AI workloads processing sensitive enterprise data — financial records, healthcare documents, legal contracts — encryption is non-negotiable. ANF provides it at every layer without performance compromise.
 
 ### Multi-Protocol Access — The Superpower
 
-Here is something that no cloud-native object store can do: ANF serves the same data over NFS, SMB, and the S3-compatible Object REST API simultaneously.
+Here is something that no cloud-native object store can do: ANF serves the same data over **NFS (v3 and v4.1)**, **SMB (2.1 and 3.x)**, and the **S3-compatible Object REST API** simultaneously. Dual-protocol volumes support NFSv3+SMB or NFSv4.1+SMB combinations, and the Object REST API works on top of any of these.
 
-Your existing applications continue to read and write files over NFS/SMB — they do not know or care that an AI agent is reading the same files through the S3 endpoint. The finance team's Excel workbooks on SMB shares? The AI agent can index them through the Object REST API. The engineering team's simulation outputs on NFS? Same story.
+Your existing applications continue to read and write files over NFS/SMB — they do not know or care that an AI agent is reading the same files through the S3 endpoint. The finance team's Excel workbooks on SMB shares? The AI agent can index them through the Object REST API. The engineering team's simulation outputs on NFS? Same story. A data scientist writes a file from a Jupyter notebook via NFS, and moments later an AI agent reads it through the S3 endpoint.
 
 This is not just convenience. It eliminates an entire category of data integration work. There is no "AI data lake" to populate. The data is already where it needs to be.
 
 ### Scalability — From Gigabytes to Petabytes
 
-ANF volumes scale from 50 GiB to 100 TiB each. Capacity pools scale up to 500 TiB. For organizations with large document corpuses — think law firms with millions of case files, or manufacturing companies with decades of engineering specs — ANF can host the entire corpus in a single storage platform that serves both traditional applications and AI workloads.
+Regular ANF volumes scale from **50 GiB to 100 TiB**. Large volumes scale from **50 TiB to over 1 PiB**. With cool access enabled, volumes can reach up to **7.2 PiB**. Capacity pools can grow to **500 TiB** each, with up to 25 pools per NetApp account.
+
+For organizations with large document corpuses — think law firms with millions of case files, or manufacturing companies with decades of engineering specs — ANF can host the entire corpus in a single storage platform that serves both traditional applications and AI workloads.
 
 ### Cool Access Tiering
 
-For data that is accessed infrequently but still needs to be available for AI indexing, ANF offers cool access tiering. Infrequently accessed data automatically moves to lower-cost storage while remaining transparently accessible through the same file paths and S3 endpoints. The AI agent does not know the difference — it calls `GetObject` and gets the file, whether it is on hot or cool tier.
+For data that is accessed infrequently but still needs to be available for AI indexing, ANF offers **cool access tiering**. Files not accessed within a configurable coolness period (2 to 183 days) automatically move to lower-cost cool storage, while metadata stays on the hot tier for fast lookups. When an AI agent or indexer needs a cool file, it is transparently retrieved — sequential reads are served directly from the cool tier without rehydration. The AI agent does not know the difference — it calls `GetObject` and gets the file, whether it is on hot or cool tier.
 
 ---
 
