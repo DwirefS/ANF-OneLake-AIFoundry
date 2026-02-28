@@ -2,6 +2,8 @@
 
 This folder contains everything needed to deploy the entire Zero-Copy RAG pipeline automatically. After running the deployment script, you can go directly to Azure AI Foundry and start chatting with a grounded AI agent.
 
+> **Complete Deployment Guide:** For the full guide with architecture deep-dive, file-by-file explanations, end-to-end instructions, technical feasibility analysis, and troubleshooting, see **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)**.
+
 ## What Gets Deployed
 
 ```
@@ -34,9 +36,14 @@ This folder contains everything needed to deploy the entire Zero-Copy RAG pipeli
 
 **AI Search configuration:**
 - OneLake data source
-- Vectorization skillset (chunking + embedding)
-- Search index with vector and semantic search
-- Indexer (runs automatically)
+- Multi-skill pipeline:
+  - **Document Intelligence Layout** — Extracts structured content from complex PDFs, forms, and invoices
+  - **OCR Skill** — Reads text from images and scanned documents
+  - **Merge Skill** — Combines OCR output with document content
+  - **Split Skill** — Chunks content into ~2000-character pages with overlap
+  - **Azure OpenAI Embedding Skill** — Generates 1536-dimensional vectors
+- Search index with vector, semantic, and keyword search
+- Indexer with image extraction enabled (runs automatically)
 
 **AI Foundry configuration:**
 - Financial Auditor agent grounded on the search index

@@ -49,20 +49,68 @@ Invoke-RestMethod -Uri "$SearchServiceEndpoint/datasources/onelake-datasource?ap
     -Method Put -Headers $searchHeaders -Body $datasourceBody
 Write-Host "  Data source created." -ForegroundColor Green
 
-# --- Step 5.2: Create Skillset (Integrated Vectorization) ---
-Write-Host "  Creating vectorization skillset..." -ForegroundColor Yellow
+# --- Step 5.2: Create Skillset (Document Intelligence + Vectorization) ---
+Write-Host "  Creating skillset with Document Intelligence + vectorization..." -ForegroundColor Yellow
 
 $skillsetBody = @{
     name        = 'rag-workshop-skillset'
-    description = 'Skillset for chunking and vectorizing financial documents'
+    description = 'Skillset with Document Intelligence for complex documents, text chunking, and vector embeddings'
     skills      = @(
+        # Skill 1: OCR — Extract text from images/scanned pages
+        @{
+            '@odata.type' = '#Microsoft.Skills.Vision.OcrSkill'
+            name          = 'ocr'
+            description   = 'Extract text from images and scanned documents'
+            context       = '/document/normalized_images/*'
+            defaultLanguageCode = 'en'
+            detectOrientation   = $true
+            inputs        = @(
+                @{ name = 'image'; source = '/document/normalized_images/*' }
+            )
+            outputs       = @(
+                @{ name = 'text'; targetName = 'ocrText' }
+            )
+        }
+        # Skill 2: Document Intelligence Layout — Extract structured content from PDFs, forms, invoices
+        @{
+            '@odata.type' = '#Microsoft.Skills.Custom.DocumentIntelligenceLayoutSkill'
+            name          = 'document-intelligence-layout'
+            description   = 'Use Document Intelligence to extract tables, key-value pairs, and structured text from complex documents'
+            context       = '/document'
+            outputMode    = 'oneToMany'
+            markdownHeaderDepth = 'h3'
+            inputs        = @(
+                @{ name = 'file_data'; source = '/document/file_data' }
+            )
+            outputs       = @(
+                @{ name = 'markdown_document'; targetName = 'markdownDocument' }
+            )
+        }
+        # Skill 3: Merge — Combine OCR text with document content for a complete text representation
+        @{
+            '@odata.type' = '#Microsoft.Skills.Text.MergeSkill'
+            name          = 'merge-content'
+            description   = 'Merge extracted text from images with document content'
+            context       = '/document'
+            insertPreTag  = ' '
+            insertPostTag = ' '
+            inputs        = @(
+                @{ name = 'text'; source = '/document/content' }
+                @{ name = 'itemsToInsert'; source = '/document/normalized_images/*/ocrText' }
+                @{ name = 'offsets'; source = '/document/normalized_images/*/contentOffset' }
+            )
+            outputs       = @(
+                @{ name = 'mergedText'; targetName = 'mergedContent' }
+            )
+        }
+        # Skill 4: Split — Chunk the merged content into pages for embedding
         @{
             '@odata.type' = '#Microsoft.Skills.Text.SplitSkill'
             name          = 'text-splitter'
-            description   = 'Split text into chunks'
+            description   = 'Split merged text into chunks'
             context       = '/document'
             inputs        = @(
-                @{ name = 'text'; source = '/document/content' }
+                @{ name = 'text'; source = '/document/mergedContent' }
             )
             outputs       = @(
                 @{ name = 'textItems'; targetName = 'chunks' }
@@ -71,6 +119,7 @@ $skillsetBody = @{
             maximumPageLength = 2000
             pageOverlapLength = 500
         }
+        # Skill 5: Embedding — Generate vector representations for each chunk
         @{
             '@odata.type' = '#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill'
             name          = 'embedding'
@@ -88,6 +137,10 @@ $skillsetBody = @{
             )
         }
     )
+    cognitiveServices = @{
+        '@odata.type' = '#Microsoft.Azure.Search.CognitiveServicesByKey'
+        key           = $AiServicesKey
+    }
     indexProjections = @{
         selectors = @(
             @{
@@ -132,8 +185,10 @@ $indexerBody = @{
     skillsetName     = 'rag-workshop-skillset'
     parameters       = @{
         configuration = @{
-            dataToExtract = 'contentAndMetadata'
-            parsingMode   = 'default'
+            dataToExtract    = 'contentAndMetadata'
+            parsingMode      = 'default'
+            imageAction      = 'generateNormalizedImages'    # Required for OCR + Document Intelligence
+            allowSkillsetToReadFileData = $true               # Required for Document Intelligence Layout skill
         }
     }
     fieldMappings = @(
