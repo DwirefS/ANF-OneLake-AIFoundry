@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero-Copy RAG Workshop | Azure NetApp Files + OneLake + AI Foundry</title>
-    <meta name="description" content="Enterprise workshop: Build RAG applications without data duplication using Azure NetApp Files, Microsoft Fabric OneLake, and Azure AI Foundry.">
+    <title>Zero-Copy RAG | Azure NetApp Files + OneLake + AI Foundry</title>
+    <meta name="description" content="Production-ready foundation for building AI agents grounded on enterprise data in Azure NetApp Files, virtualized through Microsoft Fabric OneLake, indexed by Azure AI Search, and powered by Azure AI Foundry.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,6 +15,7 @@
             --azure-light: #50A0E6;
             --fabric-purple: #742774;
             --ai-teal: #008575;
+            --accent-green: #10b981;
             --bg-primary: #0a0e1a;
             --bg-secondary: #111827;
             --bg-card: #1a2233;
@@ -25,12 +26,12 @@
             --border-color: #1e293b;
             --gradient-1: linear-gradient(135deg, #0078D4 0%, #742774 50%, #008575 100%);
             --gradient-2: linear-gradient(135deg, #0078D4 0%, #50A0E6 100%);
+            --gradient-auto: linear-gradient(135deg, #10b981 0%, #0078D4 100%);
             --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
             --shadow-glow: 0 0 60px rgba(0, 120, 212, 0.15);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         html { scroll-behavior: smooth; }
 
         body {
@@ -44,9 +45,7 @@
         /* Navigation */
         nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             z-index: 1000;
             background: rgba(10, 14, 26, 0.85);
             backdrop-filter: blur(20px);
@@ -118,10 +117,8 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
             background: radial-gradient(ellipse at 30% 20%, rgba(0, 120, 212, 0.12) 0%, transparent 50%),
                         radial-gradient(ellipse at 70% 60%, rgba(116, 39, 116, 0.08) 0%, transparent 50%),
                         radial-gradient(ellipse at 50% 80%, rgba(0, 133, 117, 0.06) 0%, transparent 50%);
@@ -156,8 +153,7 @@
 
         .hero-badge::before {
             content: '';
-            width: 6px;
-            height: 6px;
+            width: 6px; height: 6px;
             background: var(--azure-light);
             border-radius: 50%;
             animation: pulse 2s ease-in-out infinite;
@@ -183,9 +179,17 @@
             background-clip: text;
         }
 
-        .hero p {
+        .hero-subtitle {
             font-size: 1.2rem;
             color: var(--text-secondary);
+            max-width: 750px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.8;
+        }
+
+        .hero-value-prop {
+            font-size: 1rem;
+            color: var(--text-muted);
             max-width: 700px;
             margin: 0 auto 2.5rem;
             line-height: 1.8;
@@ -223,6 +227,17 @@
             box-shadow: 0 8px 30px rgba(0, 120, 212, 0.4);
         }
 
+        .btn-auto {
+            background: var(--gradient-auto);
+            color: white;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-auto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
         .btn-secondary {
             background: rgba(255,255,255,0.06);
             color: var(--text-primary);
@@ -234,20 +249,12 @@
             transform: translateY(-2px);
         }
 
-        .btn svg {
-            width: 18px;
-            height: 18px;
-        }
+        .btn svg { width: 18px; height: 18px; }
 
         /* Sections */
-        section {
-            padding: 6rem 2rem;
-        }
+        section { padding: 6rem 2rem; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
         .section-label {
             display: inline-block;
@@ -256,6 +263,16 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--azure-light);
+            margin-bottom: 1rem;
+        }
+
+        .section-label-green {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-green);
             margin-bottom: 1rem;
         }
 
@@ -269,8 +286,52 @@
         .section-desc {
             color: var(--text-secondary);
             font-size: 1.1rem;
-            max-width: 650px;
+            max-width: 700px;
             margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        /* What This Solves */
+        .solve-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .solve-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .solve-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .solve-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            font-size: 1.3rem;
+        }
+
+        .solve-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .solve-card p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
         }
 
         /* Architecture */
@@ -292,8 +353,7 @@
             content: '';
             position: absolute;
             top: 50%;
-            left: 10%;
-            right: 10%;
+            left: 10%; right: 10%;
             height: 2px;
             background: linear-gradient(90deg, var(--azure-blue), var(--fabric-purple), var(--ai-teal), var(--azure-light));
             opacity: 0.3;
@@ -318,8 +378,7 @@
         }
 
         .arch-icon {
-            width: 56px;
-            height: 56px;
+            width: 56px; height: 56px;
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -354,11 +413,6 @@
             line-height: 1.6;
         }
 
-        .arch-connector {
-            display: none;
-        }
-
-        /* Zero-Copy Highlight */
         .zero-copy-banner {
             margin-top: 3rem;
             background: linear-gradient(135deg, rgba(0, 120, 212, 0.08), rgba(0, 133, 117, 0.08));
@@ -372,8 +426,7 @@
 
         .zero-copy-icon {
             flex-shrink: 0;
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             border-radius: 12px;
             background: rgba(0, 120, 212, 0.15);
             display: flex;
@@ -382,14 +435,268 @@
             font-size: 1.5rem;
         }
 
-        .zero-copy-banner h4 {
-            font-size: 1rem;
-            margin-bottom: 0.25rem;
+        .zero-copy-banner h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+        .zero-copy-banner p { color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Two Paths */
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
         }
 
-        .zero-copy-banner p {
-            color: var(--text-secondary);
+        .path-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .path-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .path-card:first-child::before { background: var(--gradient-2); }
+        .path-card:last-child::before { background: var(--gradient-auto); }
+
+        .path-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .path-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            margin-bottom: 1.25rem;
+        }
+
+        .path-card:first-child .path-badge {
+            background: rgba(0, 120, 212, 0.15);
+            color: var(--azure-light);
+        }
+
+        .path-card:last-child .path-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+        }
+
+        .path-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .path-card .path-time {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .path-card p {
             font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .path-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .path-features li {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 0.35rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .path-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.7rem;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+
+        .path-card:first-child .path-features li::before { background: var(--azure-light); opacity: 0.5; }
+        .path-card:last-child .path-features li::before { background: var(--accent-green); opacity: 0.5; }
+
+        /* Automation Section */
+        .auto-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .auto-pipeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 2.5rem 0;
+        }
+
+        .auto-stage {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .auto-stage:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: -0.65rem;
+            top: 50%;
+            width: 0; height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid var(--border-color);
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+
+        .auto-stage-num {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .auto-stage h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .auto-stage p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .auto-highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+
+        .auto-highlight {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+
+        .auto-highlight h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: var(--accent-green);
+        }
+
+        .auto-highlight p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .auto-skills {
+            margin: 3rem 0 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(0, 120, 212, 0.06));
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+        }
+
+        .auto-skills h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .skills-flow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .skill-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .skill-arrow {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .skill-chip-label {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        /* Extend Section */
+        .extend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .extend-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .extend-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .extend-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .extend-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
         }
 
         /* Lab Steps */
@@ -412,9 +719,7 @@
         .lab-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 3px;
             border-radius: 16px 16px 0 0;
         }
@@ -436,8 +741,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border-radius: 10px;
             font-size: 0.85rem;
             font-weight: 700;
@@ -451,24 +755,10 @@
         .lab-card:nth-child(5) .lab-number { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
         .lab-card:nth-child(6) .lab-number { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
 
-        .lab-card h3 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-        }
+        .lab-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .lab-card p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.7; }
 
-        .lab-card p {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            line-height: 1.7;
-        }
-
-        .lab-card .services {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
+        .lab-card .services { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
 
         .lab-card .service-tag {
             font-size: 0.7rem;
@@ -512,25 +802,14 @@
             border-bottom: 1px solid var(--border-color);
         }
 
-        .resource-card .card-body {
-            padding: 1.25rem 1.5rem;
-        }
-
-        .resource-card h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-        }
-
-        .resource-card p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
+        .resource-card .card-body { padding: 1.25rem 1.5rem; }
+        .resource-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .resource-card p { font-size: 0.8rem; color: var(--text-muted); }
 
         /* Docs Links */
         .docs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
@@ -555,8 +834,7 @@
 
         .doc-icon {
             flex-shrink: 0;
-            width: 44px;
-            height: 44px;
+            width: 44px; height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -567,18 +845,10 @@
         .doc-card:nth-child(1) .doc-icon { background: rgba(0, 120, 212, 0.15); }
         .doc-card:nth-child(2) .doc-icon { background: rgba(116, 39, 116, 0.15); }
         .doc-card:nth-child(3) .doc-icon { background: rgba(0, 133, 117, 0.15); }
+        .doc-card:nth-child(4) .doc-icon { background: rgba(16, 185, 129, 0.15); }
 
-        .doc-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.35rem;
-        }
-
-        .doc-card p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
+        .doc-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .doc-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
         /* Prerequisites */
         .prereq-list {
@@ -601,8 +871,7 @@
 
         .prereq-check {
             flex-shrink: 0;
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             border-radius: 6px;
             background: rgba(0, 133, 117, 0.15);
             display: flex;
@@ -619,20 +888,9 @@
             text-align: center;
         }
 
-        footer p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-
-        footer a {
-            color: var(--azure-light);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
+        footer p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+        footer a { color: var(--azure-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
 
         .disclaimer {
             max-width: 700px;
@@ -646,8 +904,15 @@
             line-height: 1.7;
         }
 
-        .disclaimer strong {
-            color: #fbbf24;
+        .disclaimer strong { color: #fbbf24; }
+
+        /* Architecture Diagram Image */
+        .arch-diagram { margin-top: 2rem; text-align: center; }
+        .arch-diagram img {
+            max-width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
         }
 
         /* Responsive */
@@ -659,44 +924,27 @@
                 display: flex;
                 flex-direction: column;
                 position: absolute;
-                top: 64px;
-                left: 0;
-                right: 0;
+                top: 64px; left: 0; right: 0;
                 background: rgba(10, 14, 26, 0.98);
                 border-bottom: 1px solid var(--border-color);
                 padding: 1rem;
             }
 
-            .arch-flow {
-                grid-template-columns: 1fr;
-            }
-
+            .arch-flow, .auto-pipeline { grid-template-columns: 1fr; }
             .arch-flow::before { display: none; }
-
-            .zero-copy-banner {
-                flex-direction: column;
-                text-align: center;
-            }
-
+            .auto-stage:not(:last-child)::after { display: none; }
+            .zero-copy-banner { flex-direction: column; text-align: center; }
             .hero { padding-top: 6rem; }
+            .solve-grid { grid-template-columns: 1fr; }
+            .paths-grid { grid-template-columns: 1fr; }
+            .auto-highlight-grid { grid-template-columns: 1fr; }
+            .skills-flow { justify-content: center; }
         }
 
         @media (max-width: 480px) {
             .lab-steps { grid-template-columns: 1fr; }
             .resources-grid { grid-template-columns: 1fr; }
             .docs-grid { grid-template-columns: 1fr; }
-        }
-
-        /* Architecture Diagram Image */
-        .arch-diagram {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .arch-diagram img {
-            max-width: 100%;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
         }
     </style>
 </head>
@@ -705,12 +953,14 @@
 <!-- Navigation -->
 <nav id="navbar">
     <div class="nav-inner">
-        <span class="nav-brand">Zero-Copy RAG Workshop</span>
+        <span class="nav-brand">Zero-Copy RAG</span>
         <ul class="nav-links">
+            <li><a href="#what-this-solves">Why</a></li>
             <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#get-started">Get Started</a></li>
+            <li><a href="#automation">Automation</a></li>
             <li><a href="#lab-guide">Lab Guide</a></li>
-            <li><a href="#docs">Documentation</a></li>
-            <li><a href="#videos">Videos</a></li>
+            <li><a href="#docs">Docs</a></li>
             <li><a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry" target="_blank">GitHub</a></li>
         </ul>
         <button class="nav-toggle" onclick="document.getElementById('navbar').classList.toggle('open')" aria-label="Toggle navigation">&#9776;</button>
@@ -720,23 +970,65 @@
 <!-- Hero -->
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-badge">Enterprise AI Workshop</div>
+        <div class="hero-badge">Azure Frontier AI Solution</div>
         <h1>
-            Build RAG Without<br>
-            <span class="gradient-text">Data Duplication</span>
+            Enterprise AI Agents<br>
+            <span class="gradient-text">Grounded on Your Data</span>
         </h1>
-        <p>
-            A prescriptive enterprise workshop demonstrating how to ground Azure AI Foundry agents on data stored in Azure NetApp Files&mdash;virtualized through Microsoft Fabric OneLake&mdash;without migrating, copying, or re-platforming your source data.
+        <p class="hero-subtitle">
+            A production-ready foundation for building Azure AI Foundry agents grounded on enterprise data in Azure NetApp Files &mdash; virtualized through Microsoft Fabric OneLake &mdash; without migrating, copying, or re-platforming a single byte.
+        </p>
+        <p class="hero-value-prop">
+            This is not just a proof-of-concept. It is the <strong style="color: var(--text-primary);">base AI agent infrastructure</strong> &mdash; networking, storage, data integration, intelligent indexing, model deployments, and agent configuration &mdash; all wired together and ready to go. From here, you add your own skills, customize the workflow, and connect your own data.
         </p>
         <div class="hero-actions">
-            <a href="lab-guide.html" class="btn btn-primary">
+            <a href="#automation" class="btn btn-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                Automated Deploy (~25 min)
+            </a>
+            <a href="#lab-guide" class="btn btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
-                Start the Lab
+                Hands-On Lab
             </a>
             <a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry" class="btn btn-secondary" target="_blank">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                View on GitHub
+                GitHub
             </a>
+        </div>
+    </div>
+</section>
+
+<!-- What This Solves -->
+<section id="what-this-solves">
+    <div class="container">
+        <span class="section-label">The Problem &amp; The Solution</span>
+        <h2 class="section-title">What This Solves</h2>
+        <p class="section-desc">
+            Enterprises want to build AI agents on their existing data. But today that means copying data into new stores, building brittle ETL pipelines, and re-platforming to formats AI services understand. This project eliminates all of that.
+        </p>
+
+        <div class="solve-grid">
+            <div class="solve-card">
+                <div class="solve-icon" style="background: rgba(239, 68, 68, 0.12); color: #f87171;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>
+                </div>
+                <h3>No Data Duplication</h3>
+                <p>Data stays in Azure NetApp Files &mdash; the same NFS/SMB volumes your applications already use. OneLake virtualizes access through S3-compatible shortcuts. Zero copies, zero new storage silos, zero ETL pipelines to maintain.</p>
+            </div>
+            <div class="solve-card">
+                <div class="solve-icon" style="background: rgba(0, 120, 212, 0.12); color: var(--azure-light);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
+                </div>
+                <h3>Complete AI Agent Infrastructure</h3>
+                <p>This is the base scenario &mdash; not a throwaway demo. Networking, storage, data gateway, OneLake integration, intelligent search indexing with Document Intelligence, GPT-4o model deployments, and a grounded agent. The full stack, wired end-to-end.</p>
+            </div>
+            <div class="solve-card">
+                <div class="solve-icon" style="background: rgba(16, 185, 129, 0.12); color: var(--accent-green);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                </div>
+                <h3>Deploy and Go</h3>
+                <p>Run one script, wait ~25 minutes, open AI Foundry and start chatting. The automated deployment handles everything &mdash; infrastructure provisioning, data gateway setup, Fabric configuration, search indexing, and agent creation. Then customize from there.</p>
+            </div>
         </div>
     </div>
 </section>
@@ -747,7 +1039,7 @@
         <span class="section-label">Architecture</span>
         <h2 class="section-title">The Zero-Copy AI Data Path</h2>
         <p class="section-desc">
-            Data stays in its authoritative location throughout the entire pipeline. No ETL, no duplication, no re-platforming.
+            Four layers, four Azure services. Data flows from enterprise storage to AI agent responses without ever leaving its authoritative location.
         </p>
 
         <div class="arch-flow">
@@ -757,7 +1049,7 @@
                 </div>
                 <div class="arch-step">Layer 1 &middot; Storage</div>
                 <h3>Azure NetApp Files</h3>
-                <p>Enterprise NFS/SMB volume with S3-compatible Object REST API. Your data stays here.</p>
+                <p>Enterprise NFS/SMB volume with S3-compatible Object REST API. Your data stays here &mdash; governed, performant, and dual-protocol accessible.</p>
             </div>
             <div class="arch-card">
                 <div class="arch-icon">
@@ -765,7 +1057,7 @@
                 </div>
                 <div class="arch-step">Layer 2 &middot; Integration</div>
                 <h3>OneLake Shortcut</h3>
-                <p>Microsoft Fabric virtualizes access via S3-compatible shortcuts through a Data Gateway. Zero copies.</p>
+                <p>Microsoft Fabric virtualizes ANF data via S3-compatible shortcut through an On-Premises Data Gateway. No data movement. No copies.</p>
             </div>
             <div class="arch-card">
                 <div class="arch-icon">
@@ -773,7 +1065,7 @@
                 </div>
                 <div class="arch-step">Layer 3 &middot; Indexing</div>
                 <h3>Azure AI Search</h3>
-                <p>OneLake indexer extracts, chunks, and vectorizes content for hybrid retrieval.</p>
+                <p>OneLake indexer extracts, processes with Document Intelligence, chunks, and vectorizes content for hybrid retrieval.</p>
             </div>
             <div class="arch-card">
                 <div class="arch-icon">
@@ -781,7 +1073,7 @@
                 </div>
                 <div class="arch-step">Layer 4 &middot; Intelligence</div>
                 <h3>AI Foundry Agents</h3>
-                <p>GPT-4o agents grounded on enterprise data. Ask questions, get cited answers.</p>
+                <p>GPT-4o agents grounded on the vector index. Ask questions about your enterprise data, get answers with document citations.</p>
             </div>
         </div>
 
@@ -791,7 +1083,7 @@
             </div>
             <div>
                 <h4>Why Zero-Copy Matters</h4>
-                <p>Enterprise data stays governed in Azure NetApp Files. No new storage silos. No brittle ingestion pipelines. AI agents operate directly on trusted data through virtualization.</p>
+                <p>Enterprise data stays governed in Azure NetApp Files. No new storage silos. No brittle ingestion pipelines. The AI agent queries a pre-built vector index at runtime &mdash; it never touches the source storage. This is how production-grade RAG should work.</p>
             </div>
         </div>
 
@@ -801,8 +1093,188 @@
     </div>
 </section>
 
+<!-- Two Paths: Get Started -->
+<section id="get-started">
+    <div class="container">
+        <span class="section-label">Get Started</span>
+        <h2 class="section-title">Two Ways to Deploy</h2>
+        <p class="section-desc">
+            Choose the path that fits your goal: learn every component hands-on, or get to a working agent as fast as possible and customize from there.
+        </p>
+
+        <div class="paths-grid">
+            <div class="path-card">
+                <div class="path-badge">Learn</div>
+                <h3>Hands-On Lab</h3>
+                <div class="path-time">~2-3 hours &middot; Portal-based &middot; Step-by-step</div>
+                <p>Walk through every Azure Portal screen, understand each service configuration, and build the full pipeline manually. Ideal for workshops, training sessions, and deep understanding.</p>
+                <ul class="path-features">
+                    <li>Six structured modules with checkpoints</li>
+                    <li>Presenter talk track for live demos</li>
+                    <li>Technical deep-dive whitepaper</li>
+                    <li>Every step explained with context</li>
+                </ul>
+                <a href="lab-guide.html" class="btn btn-primary">Open Lab Guide</a>
+            </div>
+            <div class="path-card">
+                <div class="path-badge">Deploy</div>
+                <h3>Automated Deployment</h3>
+                <div class="path-time">~25 minutes &middot; Single script &middot; Production-ready</div>
+                <p>Run one PowerShell command. The automation handles infrastructure (Bicep), data gateway setup, Fabric configuration (REST API), AI Search indexing with a 5-skill pipeline, and agent creation. You go straight to AI Foundry and chat.</p>
+                <ul class="path-features">
+                    <li>Bicep + PowerShell, fully parameterized</li>
+                    <li>18 manual steps reduced to zero portal clicks</li>
+                    <li>Re-runnable, idempotent, skip-step support</li>
+                    <li>Ready to customize and extend</li>
+                </ul>
+                <a href="#automation" class="btn btn-auto">See Automation Details</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Automation Deep-Dive -->
+<section id="automation" class="auto-section">
+    <div class="container">
+        <span class="section-label-green">Automated Deployment</span>
+        <h2 class="section-title">One Script. Full Stack. Ready to Go.</h2>
+        <p class="section-desc">
+            The <code style="background: rgba(255,255,255,0.08); padding: 0.15rem 0.5rem; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">deploy.ps1</code> orchestrator chains eight steps, passing outputs between them. Every service that was manually configured in the hands-on lab is automated via Bicep templates, Azure REST APIs, Fabric REST APIs, and AI Search REST APIs.
+        </p>
+
+        <!-- Pipeline visualization -->
+        <div class="auto-pipeline">
+            <div class="auto-stage">
+                <div class="auto-stage-num">Steps 1-2</div>
+                <h4>Infrastructure</h4>
+                <p>Register providers. Deploy VNet, ANF volume, gateway VM, AI Search, AI Services, AI Foundry Hub &amp; Project via Bicep.</p>
+            </div>
+            <div class="auto-stage">
+                <div class="auto-stage-num">Steps 3-5</div>
+                <h4>Data &amp; Gateway</h4>
+                <p>Auto-generate TLS cert. Create S3 bucket + credentials. Upload test data. Install gateway silently on VM. Register with service principal.</p>
+            </div>
+            <div class="auto-stage">
+                <div class="auto-stage-num">Step 6</div>
+                <h4>Fabric &amp; OneLake</h4>
+                <p>OAuth2 auth. Create workspace &amp; lakehouse. Discover gateway. Create S3 connection. Create OneLake shortcut. All via Fabric REST API.</p>
+            </div>
+            <div class="auto-stage">
+                <div class="auto-stage-num">Steps 7-8</div>
+                <h4>AI Search &amp; Agent</h4>
+                <p>Create data source, 5-skill skillset, vector index, indexer. Run indexer. Create grounded AI agent. Verify with test query.</p>
+            </div>
+        </div>
+
+        <!-- AI Search Skillset Pipeline -->
+        <div class="auto-skills">
+            <h4>AI Search Document Processing Pipeline (5 Skills)</h4>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                Every document uploaded to ANF passes through this intelligent processing chain before becoming searchable by the AI agent:
+            </p>
+            <div class="skills-flow">
+                <div class="skill-chip">
+                    OCR
+                    <span class="skill-chip-label">Extract text from images</span>
+                </div>
+                <span class="skill-arrow">&rarr;</span>
+                <div class="skill-chip">
+                    Document Intelligence
+                    <span class="skill-chip-label">Tables, forms, structure</span>
+                </div>
+                <span class="skill-arrow">&rarr;</span>
+                <div class="skill-chip">
+                    Merge
+                    <span class="skill-chip-label">Combine all content</span>
+                </div>
+                <span class="skill-arrow">&rarr;</span>
+                <div class="skill-chip">
+                    Split
+                    <span class="skill-chip-label">Chunk into pages</span>
+                </div>
+                <span class="skill-arrow">&rarr;</span>
+                <div class="skill-chip">
+                    Embedding
+                    <span class="skill-chip-label">1536-dim vectors</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- How automation was achieved -->
+        <h3 style="font-size: 1.15rem; margin-top: 3.5rem; margin-bottom: 0.5rem;">How Every Manual Step Was Automated</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Every portal click, every RDP session, every wizard step from the hands-on lab has been replaced:
+        </p>
+
+        <div class="auto-highlight-grid">
+            <div class="auto-highlight">
+                <h4>Infrastructure as Code</h4>
+                <p>Six Bicep modules deploy all Azure resources in one shot: VNet, ANF, gateway VM, AI Search, AI Services (with GPT-4o + embedding models), AI Foundry Hub + Project with all connections.</p>
+            </div>
+            <div class="auto-highlight">
+                <h4>Auto-Generated TLS Certificate</h4>
+                <p>No more manual <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">openssl</code> commands. The script auto-generates a self-signed cert for the ANF Object REST API bucket, or accepts a user-provided one.</p>
+            </div>
+            <div class="auto-highlight">
+                <h4>Silent Gateway Install</h4>
+                <p>No RDP required. The gateway is downloaded, installed silently, and registered via service principal &mdash; all through <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">az vm run-command</code> executed from your local machine.</p>
+            </div>
+            <div class="auto-highlight">
+                <h4>Fabric via REST API</h4>
+                <p>Workspace, lakehouse, S3 connection, and OneLake shortcut are created programmatically using OAuth2 client_credentials authentication. No Fabric portal needed.</p>
+            </div>
+            <div class="auto-highlight">
+                <h4>AI Search via REST API</h4>
+                <p>Data source, 5-skill skillset (with Document Intelligence), vector index, and indexer are all created and run via REST API. The index schema is externalized as a JSON config file.</p>
+            </div>
+            <div class="auto-highlight">
+                <h4>Agent + Verification</h4>
+                <p>The AI Foundry agent is created via REST API with AI Search tool binding, then a test query is automatically run to verify the entire pipeline returns grounded answers.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Build From Here -->
+<section id="extend">
+    <div class="container">
+        <span class="section-label">Build From Here</span>
+        <h2 class="section-title">The Foundation is Ready. Now Customize.</h2>
+        <p class="section-desc">
+            This project gives you the complete base integration &mdash; all the hard plumbing between ANF, OneLake, AI Search, and AI Foundry is done. From here, you can extend in any direction:
+        </p>
+
+        <div class="extend-grid">
+            <div class="extend-card">
+                <h3>Add Your Own Data</h3>
+                <p>Replace the sample financial data with your own documents. The indexing pipeline handles PDFs, images, CSVs, and text files. Drop files on the ANF volume and re-run the indexer.</p>
+            </div>
+            <div class="extend-card">
+                <h3>Add Custom Skills</h3>
+                <p>Extend the AI Search skillset with custom skills &mdash; entity extraction, translation, classification, PII redaction &mdash; by adding to the skillset definition. The pipeline is modular.</p>
+            </div>
+            <div class="extend-card">
+                <h3>Customize the Agent</h3>
+                <p>Change the system prompt, add new tools (Code Interpreter, Azure Functions, Bing Search), adjust retrieval parameters, or create multiple specialized agents from the same index.</p>
+            </div>
+            <div class="extend-card">
+                <h3>Multi-Source RAG</h3>
+                <p>Add more OneLake shortcuts pointing to different ANF volumes, Azure Blob, ADLS Gen2, or other S3-compatible stores. AI Search can index from multiple data sources into a single index.</p>
+            </div>
+            <div class="extend-card">
+                <h3>Production Hardening</h3>
+                <p>Add private endpoints, customer-managed encryption keys, Azure Monitor diagnostics, and managed identity for all service-to-service authentication. The Bicep modules are ready to extend.</p>
+            </div>
+            <div class="extend-card">
+                <h3>Integrate Into Existing Apps</h3>
+                <p>The AI Foundry agent exposes a standard OpenAI-compatible API. Embed it into your existing applications, Teams bots, Power Apps, or custom web frontends.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Lab Guide -->
-<section id="lab-guide">
+<section id="lab-guide" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
     <div class="container">
         <span class="section-label">Hands-On Lab</span>
         <h2 class="section-title">Workshop Lab Guide</h2>
@@ -827,7 +1299,7 @@
                 <div class="services">
                     <span class="service-tag">NetApp Files</span>
                     <span class="service-tag">Object API</span>
-                    <span class="service-tag">Cyberduck</span>
+                    <span class="service-tag">S3 Client</span>
                 </div>
             </div>
             <div class="lab-card">
@@ -857,7 +1329,7 @@
                 <div class="services">
                     <span class="service-tag">AI Foundry</span>
                     <span class="service-tag">GPT-4o</span>
-                    <span class="service-tag">OpenAI</span>
+                    <span class="service-tag">Embeddings</span>
                 </div>
             </div>
             <div class="lab-card">
@@ -882,12 +1354,12 @@
 </section>
 
 <!-- Prerequisites -->
-<section style="background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+<section>
     <div class="container">
         <span class="section-label">Before You Begin</span>
         <h2 class="section-title">Prerequisites</h2>
         <p class="section-desc">
-            Ensure your environment meets these requirements before starting the workshop.
+            Ensure your environment meets these requirements before starting (either path).
         </p>
         <div class="prereq-list">
             <div class="prereq-item">
@@ -908,7 +1380,7 @@
             </div>
             <div class="prereq-item">
                 <div class="prereq-check">&#10003;</div>
-                S3 client tool (Cyberduck or S3 Browser)
+                Service Principal with Fabric API permissions (automation)
             </div>
             <div class="prereq-item">
                 <div class="prereq-check">&#10003;</div>
@@ -919,12 +1391,12 @@
 </section>
 
 <!-- Documentation -->
-<section id="docs">
+<section id="docs" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
     <div class="container">
         <span class="section-label">Documentation</span>
         <h2 class="section-title">Workshop Resources</h2>
         <p class="section-desc">
-            Comprehensive guides for implementation, presentation, and technical deep-dives.
+            Comprehensive guides for implementation, presentation, technical deep-dives, and automated deployment.
         </p>
         <div class="docs-grid">
             <a href="lab-guide.html" class="doc-card">
@@ -954,12 +1426,21 @@
                     <p>Architectural feasibility analysis covering Object REST API, OneLake virtualization, AI Search indexing, and Foundry grounding.</p>
                 </div>
             </a>
+            <a href="https://github.com/DwirefS/ANF-OneLake-AIFoundry/tree/main/automation" class="doc-card" target="_blank">
+                <div class="doc-icon" style="background: rgba(16, 185, 129, 0.15);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                </div>
+                <div>
+                    <h3>Automation Guide &amp; Scripts</h3>
+                    <p>Full deployment automation: Bicep templates, PowerShell scripts, configuration files, and the comprehensive deployment guide.</p>
+                </div>
+            </a>
         </div>
     </div>
 </section>
 
 <!-- Videos -->
-<section id="videos" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+<section id="videos">
     <div class="container">
         <span class="section-label">Video Resources</span>
         <h2 class="section-title">Watch &amp; Learn</h2>
