@@ -161,22 +161,25 @@ The vast majority of S3's 200+ API actions exist for enterprise object storage m
 
 ### Document Intelligence and Complex Document Handling
 
-The skillset pipeline includes **Azure AI Document Intelligence** (formerly Form Recognizer) as a built-in skill. This matters because the workshop uses HTML invoices and CSV financial statements — and in real enterprise scenarios, you'd encounter:
+The skillset pipeline uses the **Document Intelligence Layout** skill — a **native built-in Azure AI Search skill** (`#Microsoft.Skills.Util.DocumentIntelligenceLayoutSkill`). This is not a custom skill or external microservice. It runs through the same AI Services multi-service account we deploy in `ai-services.bicep`.
+
+This matters because in real enterprise scenarios, you'd encounter:
 
 - Scanned PDF invoices (image-based, no selectable text)
 - Complex tables in financial reports
 - Forms with key-value pairs (invoice numbers, dates, totals)
 - Multi-column layouts
 
-Document Intelligence uses AI models specifically trained on document layouts to:
+The Document Intelligence Layout skill uses AI models specifically trained on document layouts to:
 1. **Extract tables** as structured Markdown (preserving rows/columns)
 2. **Identify key-value pairs** (e.g., "Invoice Number: INV-3832")
 3. **Determine reading order** in multi-column layouts
 4. **Convert complex layouts** to clean Markdown with proper heading hierarchy
+5. **Handle images within documents** — OCR is performed internally by the Layout model
 
-The OCR skill handles the image → text conversion, and Document Intelligence handles the layout → structured text conversion. Together, they ensure the search index contains rich, well-structured content regardless of the source file format.
+The skill processes the raw file bytes (via `allowSkillsetToReadFileData = true` on the indexer) and outputs structured Markdown. This output is then chunked by the Split skill and vectorized by the Embedding skill.
 
-**No additional Azure resource needed:** The AI Services multi-service account (kind: `AIServices`) already includes Document Intelligence capabilities. The skillset references it via the same endpoint and key used for embeddings.
+**No additional Azure resource needed:** The AI Services multi-service account (kind: `AIServices`) already includes Document Intelligence capabilities. The skillset references it via the `cognitiveServices` key — the same account used for embeddings.
 
 ### Where Copies Exist (and Why)
 
@@ -420,26 +423,24 @@ This is not data duplication in the traditional sense. The search index is a der
 
 **Resources created via REST API:**
 1. **Data Source** (`onelake-datasource`): Type `onelake`, pointing to the Fabric workspace and lakehouse, scoped to the shortcut folder
-2. **Skillset** (`rag-workshop-skillset`): A 5-skill pipeline that handles everything from scanned PDFs to simple text files:
+2. **Skillset** (`rag-workshop-skillset`): A 3-skill pipeline using native built-in Azure AI Search skills:
 
    ```
-   Document → OCR Skill → Document Intelligence Layout → Merge Skill → Split Skill → Embedding Skill → Index
+   Document → Document Intelligence Layout → Split → Embedding → Index
    ```
 
-   | Skill | Type | Purpose |
-   |-------|------|---------|
-   | **OCR** | `OcrSkill` | Extracts text from images and scanned pages within documents |
-   | **Document Intelligence Layout** | `DocumentIntelligenceLayoutSkill` | Extracts structured content (tables, key-value pairs, headings) from complex PDFs, forms, and invoices using Azure AI Document Intelligence |
-   | **Merge Content** | `MergeSkill` | Combines OCR-extracted text with the document's native text content into a single unified text |
-   | **Text Splitter** | `SplitSkill` | Chunks the merged text into ~2000 character pages with 500 character overlap |
-   | **Embedding** | `AzureOpenAIEmbeddingSkill` | Generates 1536-dimensional vectors for each chunk using `text-embedding-3-small` |
+   | Skill | OData Type | Purpose |
+   |-------|------------|---------|
+   | **Document Intelligence Layout** | `Microsoft.Skills.Util.DocumentIntelligenceLayoutSkill` | Built-in AI Search skill. Extracts structured content (tables, key-value pairs, headings) as Markdown from PDFs, Office docs, images, and HTML. Handles OCR internally. |
+   | **Text Splitter** | `Microsoft.Skills.Text.SplitSkill` | Chunks the extracted Markdown into ~2000 character pages with 500 character overlap |
+   | **Embedding** | `Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill` | Generates 1536-dimensional vectors for each chunk using `text-embedding-3-small` |
 
-   **Index projections**: Maps parent documents to child chunks with parent-child key relationships
+   **All three skills are native Azure AI Search built-in skills.** Document Intelligence Layout runs through the AI Services multi-service account (same resource used for embeddings). No external microservices or custom skills needed.
 
-   **Why Document Intelligence matters:** Without it, complex invoices, scanned PDFs, and form-heavy documents would only get basic text extraction. Document Intelligence uses AI models specifically trained on document layouts to extract tables, headers, key-value pairs, and reading order — producing much richer text for the vector index. This is important for the financial invoice scenario in this workshop.
+   **Index projections**: Maps parent documents to child chunks with parent-child key relationships (`projectionMode: generatedKeyAsId`)
 
 3. **Index** (`rag-workshop-index`): Fields include `chunk` (searchable text), `vector` (1536-dim HNSW), `title`, `source_url`, and `parent_id`. Configured with semantic search.
-4. **Indexer** (`rag-workshop-indexer`): Runs once, extracts content and metadata with image extraction enabled (`imageAction: generateNormalizedImages`), passes all content through the skillset pipeline
+4. **Indexer** (`rag-workshop-indexer`): Runs once, extracts content and metadata, provides raw file bytes to the skillset (`allowSkillsetToReadFileData: true`), passes content through the 3-skill pipeline
 
 **After creation:** The script runs the indexer and polls for completion (up to 5 minutes). It reports the number of documents indexed.
 

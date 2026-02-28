@@ -28,7 +28,7 @@ $searchHeaders = @{
     'Content-Type' = 'application/json'
 }
 
-$apiVersion = '2024-07-01'
+$apiVersion = '2024-11-01-preview'   # Required for Document Intelligence Layout skill
 
 # --- Step 5.1: Create Data Source ---
 Write-Host "  Creating OneLake data source..." -ForegroundColor Yellow
@@ -54,63 +54,34 @@ Write-Host "  Creating skillset with Document Intelligence + vectorization..." -
 
 $skillsetBody = @{
     name        = 'rag-workshop-skillset'
-    description = 'Skillset with Document Intelligence for complex documents, text chunking, and vector embeddings'
+    description = 'Skillset with Document Intelligence Layout, text chunking, and vector embeddings'
     skills      = @(
-        # Skill 1: OCR — Extract text from images/scanned pages
+        # Skill 1: Document Intelligence Layout — Built-in Azure AI Search skill
+        # Extracts structured content (tables, key-value pairs, headings) as Markdown
+        # from PDFs, Office docs, images, and HTML. Uses the AI Services multi-service
+        # resource (already deployed via ai-services.bicep) — no external service needed.
         @{
-            '@odata.type' = '#Microsoft.Skills.Vision.OcrSkill'
-            name          = 'ocr'
-            description   = 'Extract text from images and scanned documents'
-            context       = '/document/normalized_images/*'
-            defaultLanguageCode = 'en'
-            detectOrientation   = $true
-            inputs        = @(
-                @{ name = 'image'; source = '/document/normalized_images/*' }
-            )
-            outputs       = @(
-                @{ name = 'text'; targetName = 'ocrText' }
-            )
-        }
-        # Skill 2: Document Intelligence Layout — Extract structured content from PDFs, forms, invoices
-        @{
-            '@odata.type' = '#Microsoft.Skills.Custom.DocumentIntelligenceLayoutSkill'
-            name          = 'document-intelligence-layout'
-            description   = 'Use Document Intelligence to extract tables, key-value pairs, and structured text from complex documents'
-            context       = '/document'
-            outputMode    = 'oneToMany'
+            '@odata.type'       = '#Microsoft.Skills.Util.DocumentIntelligenceLayoutSkill'
+            name                = 'document-intelligence-layout'
+            description         = 'Extract structured content from documents using Document Intelligence Layout model'
+            context             = '/document'
+            outputMode          = 'oneToMany'
             markdownHeaderDepth = 'h3'
-            inputs        = @(
+            inputs              = @(
                 @{ name = 'file_data'; source = '/document/file_data' }
             )
-            outputs       = @(
-                @{ name = 'markdown_document'; targetName = 'markdownDocument' }
+            outputs             = @(
+                @{ name = 'markdown_document'; targetName = 'extractedContent' }
             )
         }
-        # Skill 3: Merge — Combine OCR text with document content for a complete text representation
-        @{
-            '@odata.type' = '#Microsoft.Skills.Text.MergeSkill'
-            name          = 'merge-content'
-            description   = 'Merge extracted text from images with document content'
-            context       = '/document'
-            insertPreTag  = ' '
-            insertPostTag = ' '
-            inputs        = @(
-                @{ name = 'text'; source = '/document/content' }
-                @{ name = 'itemsToInsert'; source = '/document/normalized_images/*/ocrText' }
-                @{ name = 'offsets'; source = '/document/normalized_images/*/contentOffset' }
-            )
-            outputs       = @(
-                @{ name = 'mergedText'; targetName = 'mergedContent' }
-            )
-        }
-        # Skill 4: Split — Chunk the merged content into pages for embedding
+        # Skill 2: Split — Chunk the extracted content into pages for embedding
         @{
             '@odata.type' = '#Microsoft.Skills.Text.SplitSkill'
             name          = 'text-splitter'
-            description   = 'Split merged text into chunks'
-            context       = '/document'
+            description   = 'Split extracted text into chunks for vectorization'
+            context       = '/document/extractedContent/*'
             inputs        = @(
-                @{ name = 'text'; source = '/document/mergedContent' }
+                @{ name = 'text'; source = '/document/extractedContent/*' }
             )
             outputs       = @(
                 @{ name = 'textItems'; targetName = 'chunks' }
@@ -119,18 +90,18 @@ $skillsetBody = @{
             maximumPageLength = 2000
             pageOverlapLength = 500
         }
-        # Skill 5: Embedding — Generate vector representations for each chunk
+        # Skill 3: Embedding — Generate vector representations for each chunk
         @{
             '@odata.type' = '#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill'
             name          = 'embedding'
-            description   = 'Generate embeddings for each chunk'
-            context       = '/document/chunks/*'
+            description   = 'Generate 1536-dimensional embeddings for each chunk'
+            context       = '/document/extractedContent/*/chunks/*'
             modelName     = 'text-embedding-3-small'
             resourceUri   = $AiServicesEndpoint
             apiKey        = $AiServicesKey
             deploymentId  = 'text-embedding-3-small'
             inputs        = @(
-                @{ name = 'text'; source = '/document/chunks/*' }
+                @{ name = 'text'; source = '/document/extractedContent/*/chunks/*' }
             )
             outputs       = @(
                 @{ name = 'embedding'; targetName = 'vector' }
@@ -144,12 +115,12 @@ $skillsetBody = @{
     indexProjections = @{
         selectors = @(
             @{
-                targetIndexName  = $IndexName
+                targetIndexName    = $IndexName
                 parentKeyFieldName = 'parent_id'
-                sourceContext     = '/document/chunks/*'
-                mappings         = @(
-                    @{ name = 'chunk'; source = '/document/chunks/*' }
-                    @{ name = 'vector'; source = '/document/chunks/*/vector' }
+                sourceContext      = '/document/extractedContent/*/chunks/*'
+                mappings           = @(
+                    @{ name = 'chunk'; source = '/document/extractedContent/*/chunks/*' }
+                    @{ name = 'vector'; source = '/document/extractedContent/*/chunks/*/vector' }
                     @{ name = 'title'; source = '/document/metadata_storage_name' }
                     @{ name = 'source_url'; source = '/document/metadata_storage_path' }
                 )
@@ -185,10 +156,9 @@ $indexerBody = @{
     skillsetName     = 'rag-workshop-skillset'
     parameters       = @{
         configuration = @{
-            dataToExtract    = 'contentAndMetadata'
-            parsingMode      = 'default'
-            imageAction      = 'generateNormalizedImages'    # Required for OCR + Document Intelligence
-            allowSkillsetToReadFileData = $true               # Required for Document Intelligence Layout skill
+            dataToExtract               = 'contentAndMetadata'
+            parsingMode                 = 'default'
+            allowSkillsetToReadFileData = $true    # Required: provides raw file bytes to Document Intelligence Layout skill
         }
     }
     fieldMappings = @(

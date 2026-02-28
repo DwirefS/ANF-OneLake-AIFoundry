@@ -1120,7 +1120,7 @@
                 <div class="path-badge">Deploy</div>
                 <h3>Automated Deployment</h3>
                 <div class="path-time">~25 minutes &middot; Single script &middot; Production-ready</div>
-                <p>Run one PowerShell command. The automation handles infrastructure (Bicep), data gateway setup, Fabric configuration (REST API), AI Search indexing with a 5-skill pipeline, and agent creation. You go straight to AI Foundry and chat.</p>
+                <p>Run one PowerShell command. The automation handles infrastructure (Bicep), data gateway setup, Fabric configuration (REST API), AI Search indexing with a 3-skill pipeline, and agent creation. You go straight to AI Foundry and chat.</p>
                 <ul class="path-features">
                     <li>Bicep + PowerShell, fully parameterized</li>
                     <li>18 manual steps reduced to zero portal clicks</li>
@@ -1162,35 +1162,25 @@
             <div class="auto-stage">
                 <div class="auto-stage-num">Steps 7-8</div>
                 <h4>AI Search &amp; Agent</h4>
-                <p>Create data source, 5-skill skillset, vector index, indexer. Run indexer. Create grounded AI agent. Verify with test query.</p>
+                <p>Create data source, 3-skill skillset, vector index, indexer. Run indexer. Create grounded AI agent. Verify with test query.</p>
             </div>
         </div>
 
         <!-- AI Search Skillset Pipeline -->
         <div class="auto-skills">
-            <h4>AI Search Document Processing Pipeline (5 Skills)</h4>
+            <h4>AI Search Document Processing Pipeline (3 Native Built-In Skills)</h4>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">
-                Every document uploaded to ANF passes through this intelligent processing chain before becoming searchable by the AI agent:
+                Every document passes through this processing chain &mdash; all three are <strong>native built-in Azure AI Search skills</strong>, powered by the same AI Services account. No custom skills or external microservices.
             </p>
             <div class="skills-flow">
                 <div class="skill-chip">
-                    OCR
-                    <span class="skill-chip-label">Extract text from images</span>
-                </div>
-                <span class="skill-arrow">&rarr;</span>
-                <div class="skill-chip">
-                    Document Intelligence
-                    <span class="skill-chip-label">Tables, forms, structure</span>
-                </div>
-                <span class="skill-arrow">&rarr;</span>
-                <div class="skill-chip">
-                    Merge
-                    <span class="skill-chip-label">Combine all content</span>
+                    Document Intelligence Layout
+                    <span class="skill-chip-label">Tables, forms, OCR, structure &rarr; Markdown</span>
                 </div>
                 <span class="skill-arrow">&rarr;</span>
                 <div class="skill-chip">
                     Split
-                    <span class="skill-chip-label">Chunk into pages</span>
+                    <span class="skill-chip-label">Chunk into ~2000 char pages</span>
                 </div>
                 <span class="skill-arrow">&rarr;</span>
                 <div class="skill-chip">
@@ -1225,7 +1215,7 @@
             </div>
             <div class="auto-highlight">
                 <h4>AI Search via REST API</h4>
-                <p>Data source, 5-skill skillset (with Document Intelligence), vector index, and indexer are all created and run via REST API. The index schema is externalized as a JSON config file.</p>
+                <p>Data source, 3-skill skillset (Document Intelligence Layout, Split, Embed &mdash; all native built-in skills), vector index, and indexer are all created and run via REST API. Index schema is externalized as JSON.</p>
             </div>
             <div class="auto-highlight">
                 <h4>Agent + Verification</h4>

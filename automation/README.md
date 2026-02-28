@@ -27,7 +27,7 @@ Every step that was previously manual is now automated:
 | Create OneLake shortcut via Fabric Portal | PowerShell script (`04-configure-fabric.ps1`) | Fabric REST API (`POST .../shortcuts`) |
 | Configure AI Search data source via Import Wizard | PowerShell script (`05-configure-ai-search.ps1`) | AI Search REST API (`PUT .../datasources/...`) |
 | Configure AI Search index via Import Wizard | JSON config (`ai-search-index.json`) + PowerShell | AI Search REST API with externalized index schema |
-| Configure AI Search skillset via Import Wizard | PowerShell script (`05-configure-ai-search.ps1`) | AI Search REST API with 5-skill pipeline defined in code |
+| Configure AI Search skillset via Import Wizard | PowerShell script (`05-configure-ai-search.ps1`) | AI Search REST API with 3-skill pipeline defined in code |
 | Configure AI Search indexer via Import Wizard | PowerShell script (`05-configure-ai-search.ps1`) | AI Search REST API with image extraction + Document Intelligence enabled |
 | Deploy AI Services + models via Portal | Bicep module (`ai-services.bicep`) | GPT-4o and text-embedding-3-small deployed declaratively |
 | Create AI Foundry Hub + Project via Portal | Bicep module (`ai-foundry.bicep`) | Hub, Project, connections, Storage Account, Key Vault — all in Bicep |
@@ -50,7 +50,7 @@ Every step that was previously manual is now automated:
 │  │                 │     │                  │     │                  │     │            ││
 │  │  • NFS Volume   │     │  • Workspace     │     │  • OneLake       │     │  • Hub     ││
 │  │  • S3 Bucket    │     │  • Lakehouse     │     │    Data Source   │     │  • Project ││
-│  │  • TLS Cert     │     │  • S3 Connection │     │  • 5-Skill       │     │  • Agent   ││
+│  │  • TLS Cert     │     │  • S3 Connection │     │  • 3-Skill       │     │  • Agent   ││
 │  │  • Credentials  │     │  • OneLake       │     │    Skillset      │     │  • GPT-4o  ││
 │  │  • Test Data    │     │    Shortcut      │     │  • Vector Index  │     │  • Search  ││
 │  │                 │     │                  │     │  • Indexer        │     │    Tool    ││
@@ -97,7 +97,7 @@ Understanding how data moves through the system is key to understanding why this
 5. AI Search OneLake Indexer          Reads files through OneLake, extracts content
        │
        ▼
-6. AI Search Skillset Pipeline        5-skill processing chain (see below)
+6. AI Search Skillset Pipeline        3-skill processing chain (see below)
        │
        ▼
 7. AI Search Vector Index             Chunked, vectorized, semantically searchable content
@@ -116,32 +116,36 @@ The agent queries the pre-built AI Search index using vector + semantic search, 
 
 ---
 
-## AI Search Skillset Pipeline — The 5-Skill Chain
+## AI Search Skillset Pipeline — 3 Native Built-In Skills
 
-The automation configures a sophisticated document processing pipeline that handles both text-heavy documents and image/scan-heavy documents:
+The automation configures a document processing pipeline using **three native Azure AI Search built-in skills**. No custom skills, no external microservices — everything runs through services we already deploy:
 
 ```
-┌─────────────────┐     ┌──────────────────────┐     ┌─────────────┐     ┌─────────────┐     ┌──────────────┐
-│  1. OCR Skill   │     │  2. Document Intel    │     │  3. Merge   │     │  4. Split   │     │  5. Embedding│
-│                 │     │     Layout Skill      │     │    Skill    │     │    Skill    │     │    Skill     │
-│  Extracts text  │     │  Extracts tables,     │     │  Combines   │     │  Chunks     │     │  Generates   │
-│  from images    │     │  key-value pairs,     │     │  OCR text   │     │  merged     │     │  1536-dim    │
-│  and scanned    │────▶│  headings, and        │────▶│  with       │────▶│  content    │────▶│  vectors     │
-│  documents      │     │  structured content   │     │  document   │     │  into ~2000 │     │  using text- │
-│                 │     │  from complex PDFs    │     │  content    │     │  char pages │     │  embedding-  │
-│  Context:       │     │                       │     │             │     │  with 500   │     │  3-small     │
-│  /normalized_   │     │  Context: /document   │     │  Context:   │     │  char       │     │              │
-│   images/*      │     │  Output: Markdown     │     │  /document  │     │  overlap    │     │  Context:    │
-│                 │     │                       │     │             │     │             │     │  /chunks/*   │
-└─────────────────┘     └──────────────────────┘     └─────────────┘     └─────────────┘     └──────────────┘
+┌──────────────────────────┐         ┌─────────────────────┐         ┌──────────────────────┐
+│  1. Document Intelligence│         │  2. Split Skill     │         │  3. Embedding Skill  │
+│     Layout Skill         │         │                     │         │                      │
+│                          │         │  Chunks extracted   │         │  Generates 1536-dim  │
+│  Built-in AI Search skill│         │  Markdown into      │         │  vectors using       │
+│  (Util.DocumentIntel-    │────────▶│  ~2000 char pages   │────────▶│  text-embedding-     │
+│   ligenceLayoutSkill)    │         │  with 500 char      │         │  3-small             │
+│                          │         │  overlap            │         │                      │
+│  Extracts structured     │         │                     │         │  Powered by AI       │
+│  content as Markdown:    │         │  Context:           │         │  Services (same      │
+│  tables, headings,       │         │  /extractedContent/* │         │  resource)           │
+│  key-value pairs, OCR    │         │                     │         │                      │
+│                          │         │                     │         │  Context:            │
+│  Powered by AI Services  │         │                     │         │  /extractedContent/  │
+│  (same multi-service     │         │                     │         │   */chunks/*         │
+│   account as embeddings) │         │                     │         │                      │
+└──────────────────────────┘         └─────────────────────┘         └──────────────────────┘
 ```
 
 **Why this pipeline?** Financial documents come in many forms:
-- **PDF invoices** with tables, logos, and mixed layouts → Document Intelligence extracts structured content
-- **Scanned documents** or image-based PDFs → OCR extracts text from images
-- **CSV/text files** → Standard content extraction, then chunked and embedded
+- **PDF invoices** with tables, logos, and mixed layouts → Document Intelligence extracts structured Markdown
+- **Scanned documents** or image-based PDFs → Document Intelligence handles OCR internally
+- **HTML/CSV/text files** → Document Intelligence processes raw file bytes
 
-The pipeline handles all these cases. The indexer is configured with `imageAction: generateNormalizedImages` (enables OCR) and `allowSkillsetToReadFileData: true` (enables Document Intelligence).
+All three skills are **native Azure AI Search built-in skills** — not custom skills or external services. Document Intelligence Layout runs through the AI Services multi-service account (`kind: AIServices`) we already deploy, using the same endpoint and key as the embedding model. The indexer is configured with `allowSkillsetToReadFileData: true` to provide raw file bytes to the Layout skill.
 
 ### Index Schema
 
@@ -202,7 +206,7 @@ Plus **semantic search** configuration for re-ranking results using the `chunk` 
 | Resource | Script | Details |
 |----------|--------|---------|
 | OneLake Data Source | `05-configure-ai-search.ps1` | Connects to Fabric workspace/lakehouse |
-| 5-Skill Skillset | `05-configure-ai-search.ps1` | OCR → Doc Intelligence → Merge → Split → Embed |
+| 3-Skill Skillset | `05-configure-ai-search.ps1` | Document Intelligence Layout → Split → Embed |
 | Vector + Semantic Index | `05-configure-ai-search.ps1` | Schema loaded from `ai-search-index.json` |
 | Indexer | `05-configure-ai-search.ps1` | Image extraction + Document Intelligence enabled |
 
@@ -364,7 +368,7 @@ The orchestrator (`deploy.ps1`) chains all steps, passing outputs from each step
 | 4 | `03-upload-data.ps1` | Upload `test_data/` (invoices + financial statements) to ANF bucket via `aws s3 sync` | ~1 min |
 | 5 | `deploy.ps1` (inline) | Install gateway on VM via `az vm run-command` (silent install + SP registration) | ~5 min |
 | 6 | `04-configure-fabric.ps1` | Create workspace, lakehouse, discover gateway, create S3 connection, create shortcut | ~2 min |
-| 7 | `05-configure-ai-search.ps1` | Create data source, 5-skill skillset, vector index, indexer; run indexer and wait | ~3 min |
+| 7 | `05-configure-ai-search.ps1` | Create data source, 3-skill skillset, vector index, indexer; run indexer and wait | ~3 min |
 | 8 | `06-configure-agent.ps1` | Create AI agent with search tool, run test query to verify grounding | ~1 min |
 
 **Output passing between steps:**
@@ -411,7 +415,7 @@ automation/
 │   ├── 02-configure-anf-bucket.ps1# Auto-gen cert, create bucket, generate S3 credentials
 │   ├── 03-upload-data.ps1         # Upload test_data/ to ANF bucket via AWS CLI
 │   ├── 04-configure-fabric.ps1    # Workspace, lakehouse, gateway discovery, connection, shortcut
-│   ├── 05-configure-ai-search.ps1 # Data source, 5-skill skillset, index, indexer
+│   ├── 05-configure-ai-search.ps1 # Data source, 3-skill skillset, index, indexer
 │   ├── 06-configure-agent.ps1     # Create agent, bind search tool, run verification test
 │   └── gateway/
 │       └── install-gateway.ps1    # Runs ON the VM — silent install + SP registration
@@ -505,7 +509,7 @@ az group delete --name rg-rag-workshop --yes --no-wait
 | **Data Upload** | Manual AWS CLI commands | Scripted `aws s3 sync` with auto-configured credentials |
 | **Gateway** | RDP into VM → download → install → register → configure | Silent install via `az vm run-command` + SP registration |
 | **Fabric** | Portal wizards for workspace, lakehouse, connection, shortcut | REST API with OAuth2 client_credentials |
-| **AI Search** | Import Data wizard (multi-step wizard) | REST API with 5-skill skillset defined in code |
+| **AI Search** | Import Data wizard (multi-step wizard) | REST API with 3-skill skillset defined in code |
 | **AI Agent** | Portal-based creation + manual tool configuration | REST API with automated test verification |
 | **Reproducibility** | Must repeat all steps for each deployment | Run the same script with different parameters |
 | **Error Handling** | Manual troubleshooting | Script exits on error with descriptive messages |
