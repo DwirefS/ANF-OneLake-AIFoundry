@@ -49,7 +49,7 @@ Every step that was previously manual is now automated:
 │  │  Files          │     │  Fabric OneLake  │     │  Search          │     │  Foundry   │ │
 │  │                 │     │                  │     │                  │     │            │ │
 │  │  • NFS Volume   │     │  • Workspace     │     │  • OneLake       │     │  • Hub     │ │
-│  │  • S3 Bucket    │     │  • Lakehouse     │     │    Data Source   │     │  • Project │ │
+│  │  • Object Bucket│     │  • Lakehouse     │     │    Data Source   │     │  • Project │ │
 │  │  • TLS Cert     │     │  • S3 Connection │     │  • 3-Skill       │     │  • Agent   │ │
 │  │  • Credentials  │     │  • OneLake       │     │    Skillset      │     │  • GPT-4o  │ │
 │  │  • Test Data    │     │    Shortcut      │     │  • Vector Index  │     │  • Search  │ │
