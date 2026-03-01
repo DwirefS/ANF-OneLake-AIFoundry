@@ -42,22 +42,22 @@ Every step that was previously manual is now automated:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────────────────┐
-│                              DEPLOYMENT TIME (deploy.ps1)                                  │
+│                              DEPLOYMENT TIME (deploy.ps1)                                 │
 │                                                                                           │
-│  ┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌────────────┐│
-│  │  Azure NetApp   │────▶│  Microsoft       │────▶│  Azure AI        │────▶│  Azure AI  ││
-│  │  Files          │     │  Fabric OneLake  │     │  Search          │     │  Foundry   ││
-│  │                 │     │                  │     │                  │     │            ││
-│  │  • NFS Volume   │     │  • Workspace     │     │  • OneLake       │     │  • Hub     ││
-│  │  • S3 Bucket    │     │  • Lakehouse     │     │    Data Source   │     │  • Project ││
-│  │  • TLS Cert     │     │  • S3 Connection │     │  • 3-Skill       │     │  • Agent   ││
-│  │  • Credentials  │     │  • OneLake       │     │    Skillset      │     │  • GPT-4o  ││
-│  │  • Test Data    │     │    Shortcut      │     │  • Vector Index  │     │  • Search  ││
-│  │                 │     │                  │     │  • Indexer        │     │    Tool    ││
-│  └────────┬────────┘     └────────┬─────────┘     └──────────────────┘     └────────────┘│
+│  ┌─────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌────────────┐ │
+│  │  Azure NetApp   │────▶│  Microsoft       │────▶│  Azure AI        │────▶│  Azure AI  │ │
+│  │  Files          │     │  Fabric OneLake  │     │  Search          │     │  Foundry   │ │
+│  │                 │     │                  │     │                  │     │            │ │
+│  │  • NFS Volume   │     │  • Workspace     │     │  • OneLake       │     │  • Hub     │ │
+│  │  • S3 Bucket    │     │  • Lakehouse     │     │    Data Source   │     │  • Project │ │
+│  │  • TLS Cert     │     │  • S3 Connection │     │  • 3-Skill       │     │  • Agent   │ │
+│  │  • Credentials  │     │  • OneLake       │     │    Skillset      │     │  • GPT-4o  │ │
+│  │  • Test Data    │     │    Shortcut      │     │  • Vector Index  │     │  • Search  │ │
+│  │                 │     │                  │     │  • Indexer       │     │    Tool    │ │
+│  └────────┬────────┘     └────────┬─────────┘     └──────────────────┘     └────────────┘ │
 │           │                       │                                                       │
-│      S3 Protocol              Data Gateway VM                                             │
-│      (5-6 ops)               (Windows Server)                                             │
+│      S3-Compatible            Data Gateway VM                                             │
+│      Object REST API         (Windows Server)                                             │
 │                              Silent Install +                                             │
 │                              SP Registration                                              │
 └───────────────────────────────────────────────────────────────────────────────────────────┘
@@ -88,7 +88,7 @@ Understanding how data moves through the system is key to understanding why this
 2. ANF Object REST API               S3-compatible endpoint exposes files as objects
        │                              (GetObject, ListObjects — that's all we need)
        ▼
-3. Data Gateway VM                    Bridges VNet-isolated S3 endpoint to Fabric SaaS
+3. Data Gateway VM                    Bridges VNet-isolated Object endpoint to Fabric SaaS
        │                              (installed silently, registered via service principal)
        ▼
 4. Fabric OneLake Shortcut           Zero-copy virtualization — files appear in OneLake
@@ -131,7 +131,7 @@ The automation configures a document processing pipeline using **three native Az
 │                          │         │  overlap            │         │                      │
 │  Extracts structured     │         │                     │         │  Powered by AI       │
 │  content as Markdown:    │         │  Context:           │         │  Services (same      │
-│  tables, headings,       │         │  /extractedContent/* │         │  resource)           │
+│  tables, headings,       │         │  /extractedContent/*│         │  resource)           │
 │  key-value pairs, OCR    │         │                     │         │                      │
 │                          │         │                     │         │  Context:            │
 │  Powered by AI Services  │         │                     │         │  /extractedContent/  │
