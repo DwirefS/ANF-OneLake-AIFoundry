@@ -32,6 +32,18 @@ param anfPoolSizeTiB int = 2
 @description('ANF volume quota in GiB')
 param anfVolumeQuotaGiB int = 100
 
+// ADDED: Lab Lesson 4 — Skip RBAC when deployer lacks User Access Administrator role
+@description('Set to false to skip RBAC role assignment (requires User Access Administrator)')
+param deployRbac bool = true
+
+// ADDED: Lab Lesson 9 — Enterprise policy "Do Not Allow Public IPs" blocks gateway VM PIP
+@description('Set to false to skip Public IP on gateway VM (required when subscription has no-public-IP policy)')
+param deployPublicIp bool = true
+
+// ADDED: Deploy Azure Bastion for secure RDP (needed when no public IP — Lesson 9, 18)
+@description('Deploy Azure Bastion for RDP access to gateway VM. Required when deployPublicIp=false.')
+param deployBastion bool = true
+
 // ---- Modules ----
 
 module networking 'modules/networking.bicep' = {
@@ -39,6 +51,7 @@ module networking 'modules/networking.bicep' = {
   params: {
     location: location
     prefix: prefix
+    deployBastion: deployBastion  // ADDED: pass Bastion toggle to networking module
   }
 }
 
@@ -61,6 +74,43 @@ module gatewayVm 'modules/gateway-vm.bicep' = {
     subnetId: networking.outputs.defaultSubnetId
     adminUsername: vmAdminUsername
     adminPassword: vmAdminPassword
+    deployPublicIp: deployPublicIp  // Lab Lesson 9: pass through PIP toggle
+  }
+}
+
+// ADDED: Azure Bastion for secure RDP access to gateway VM (Lesson 9 — no public IPs)
+// Bastion requires: AzureBastionSubnet (/26+), Standard SKU Public IP, and Basic+ SKU Bastion.
+resource bastionPip 'Microsoft.Network/publicIPAddresses@2024-05-01' = if (deployBastion) {
+  name: '${prefix}-bastion-pip'
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
+  }
+}
+
+resource bastion 'Microsoft.Network/bastionHosts@2024-05-01' = if (deployBastion) {
+  name: '${prefix}-bastion'
+  location: location
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'bastionIpConfig'
+        properties: {
+          publicIPAddress: {
+            id: bastionPip.id
+          }
+          subnet: {
+            id: networking.outputs.bastionSubnetId
+          }
+        }
+      }
+    ]
   }
 }
 
@@ -78,6 +128,7 @@ module aiServices 'modules/ai-services.bicep' = {
     location: location
     prefix: prefix
     userObjectId: userObjectId
+    deployRbac: deployRbac  // Lab Lesson 4: pass through RBAC toggle
   }
 }
 
@@ -110,6 +161,10 @@ output anfCapacityPoolName string = anf.outputs.capacityPoolName
 // Gateway VM
 output gatewayVmName string = gatewayVm.outputs.vmName
 output gatewayVmPublicIp string = gatewayVm.outputs.vmPublicIp
+output gatewayVmPrivateIp string = gatewayVm.outputs.vmPrivateIp
+
+// Bastion (ADDED: for secure RDP access)
+output bastionName string = deployBastion ? bastion.name : 'not-deployed'
 
 // AI Search
 output searchServiceName string = aiSearch.outputs.searchServiceName

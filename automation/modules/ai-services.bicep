@@ -12,6 +12,12 @@ param prefix string
 @description('User object ID for Cognitive Services OpenAI User role')
 param userObjectId string
 
+// ADDED: Parameter to skip RBAC assignment when deployer lacks User Access Administrator role
+// Lab Lesson 4: Contributor role alone cannot create role assignments.
+// Set to false if you only have Contributor (not Owner or UAA).
+@description('Set to false to skip RBAC role assignment (requires User Access Administrator)')
+param deployRbac bool = true
+
 // --- AI Services Account ---
 resource aiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: '${prefix}-ai-services'
@@ -67,7 +73,18 @@ resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
 }
 
 // --- Cognitive Services OpenAI User role assignment ---
-resource openaiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+// ORIGINAL (unconditional): Would fail if deployer lacks User Access Administrator role.
+// resource openaiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(aiServices.id, userObjectId, 'CognitiveServicesOpenAIUser')
+//   scope: aiServices
+//   properties: {
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+//     principalId: userObjectId
+//     principalType: 'User'
+//   }
+// }
+// MODIFIED: Made conditional with deployRbac parameter (Lab Lesson 4)
+resource openaiUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (deployRbac) {
   name: guid(aiServices.id, userObjectId, 'CognitiveServicesOpenAIUser')
   scope: aiServices
   properties: {

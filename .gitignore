@@ -1,0 +1,39 @@
+# ===========================================
+# Kept Local — sensitive/working files
+# These files are kept on disk but NOT committed
+# ===========================================
+
+# --- Secrets & Certificates ---
+cert.pem
+*.pem
+*.pfx
+*.key
+
+# --- Lab Lessons (contain real access keys, IPs, credentials from validation runs) ---
+HOL_LabLessons.md
+LabLessons.md
+
+# --- Admin requests & emails (contain subscription IDs, tenant IDs, SP instructions) ---
+email_to_sub_admin.md
+ADMIN_REQUESTS_FOR_DISHANK.md
+admin-email-permissions-request.docx
+
+# --- Test data (uploaded to ANF volume, not needed in repo) ---
+test_data/
+
+# --- Seed documents ---
+Seed/
+
+# --- Draft/working files ---
+misc/final-medium-draft.docx
+misc/final-medium-draft.md
+
+# --- OS artifacts ---
+.DS_Store
+**/.DS_Store
+
+# --- Environment / credentials ---
+.env
+*.env
+.env.*
+credentials.json

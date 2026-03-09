@@ -1,6 +1,10 @@
 # Zero-Copy RAG Workshop — Complete Deployment Guide
 
-This document provides **end-to-end instructions** for deploying the automated Zero-Copy RAG pipeline, including architecture details, file-by-file explanations, prerequisites, deployment steps, post-deployment verification, and technical notes.
+This document provides **end-to-end instructions** for deploying the automated Zero-Copy RAG pipeline using the fully automated `deploy.ps1` script. It includes architecture details, comprehensive prerequisites, step-by-step deployment instructions, verification procedures, operational notes, and real-world troubleshooting based on enterprise deployment validation.
+
+**Last Updated:** 2026-03-04
+**Status:** Production-Ready (Validated for Enterprise Environments)
+**Scope:** Fully Automated Deployment via PowerShell
 
 ---
 
@@ -86,9 +90,11 @@ The automation deploys a complete **four-layer pipeline** that enables Azure AI 
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Total Azure resources created:** ~15 resources (VNet, NSG, VM, PIP, NIC, NetApp account, pool, volume, AI Search, AI Services, 2 model deployments, Storage Account, Key Vault, AI Hub, AI Project)
+**Total Azure resources created:** ~16 resources (VNet, 3 subnets including AzureBastionSubnet, NSG, Bastion Host, Bastion PIP, VM, PIP optional, NIC, NetApp account, pool, volume, AI Search, AI Services, 2 model deployments, Storage Account, Key Vault, AI Hub, AI Project)
 
 **Total Fabric resources created:** 4 (workspace, lakehouse, connection, shortcut)
+
+**Key Enterprise Note:** This deployment includes Azure Bastion for secure access to the gateway VM. The script supports environments with "Do Not Allow Public IPs" Azure Policy by making public IP resources optional.
 
 ---
 
@@ -190,18 +196,24 @@ The "zero-copy" label refers to the storage layer. However, Azure AI Search **do
 
 This is not data duplication in the traditional sense. The search index is a derived, query-optimized representation, not a second copy of the source files.
 
-### Known Limitations and Edge Cases
+### Known Limitations and Enterprise Considerations
 
 | Concern | Impact | Mitigation |
 |---------|--------|------------|
-| Object REST API is in **preview** | API surface could change | Pin to specific API version; test before production |
-| Self-signed TLS certificate | Gateway must trust it; expires after 365 days | Script auto-generates; set calendar reminder for renewal |
-| AI Search document size limits | Very large files (>16MB) may fail to index | Use reasonably sized files; add Document Intelligence skill for complex PDFs |
-| OneLake shortcut metadata caching | New files on ANF may not appear immediately | Re-run the indexer after adding new files |
-| Fabric Trial capacity limits | Limited compute and storage | Use paid capacity for production; Trial works for workshop |
-| Agent networking | Foundry agents don't support private AI Search endpoints (current limitation) | Keep AI Search public for workshop; use standard agent setup with VNet for production |
-| Model deployment quota | GPT-4o has regional quota limits | Check quota before deployment; use alternative region if needed |
-| Gateway registration requires PowerShell 7 | DataGateway module doesn't work on PowerShell 5.x | VM script installs PS7 if needed |
+| Object REST API is in **preview** | API surface could change; silent failures if network features not Standard | Pin to API version 2025-03-01-preview; always deploy with `networkFeatures: Standard` |
+| Self-signed TLS certificate | Expires after 365 days; must be trusted by all clients | Script auto-generates; set calendar reminder for renewal; import cert on all S3 clients |
+| **Fabric capacity is REQUIRED** | Free tier does NOT support On-Premises Data Gateway | Use Trial F SKU or paid capacity; guest users cannot start trials |
+| ANF bucket creation silent failures | PUT returns 201 but GET returns NoBucketFound | Always check Activity Log after bucket creation; verify network features are Standard, UID≠0 |
+| AI Search document size limits | Very large files (>16MB) may fail to index | Use Document Intelligence skill for complex PDFs; keep files under 16MB |
+| OneLake shortcut metadata caching | New files on ANF may not appear immediately | Re-run indexer after adding new files; shortcut may cache for 5+ minutes |
+| Fabric Trial capacity limits | Limited compute and storage (shared resources) | Use paid capacity for production; Trial works for workshop (60 days) |
+| Agent networking | Foundry agents don't support private AI Search endpoints | Keep AI Search public for workshop; use standard agent setup with VNet for production |
+| Model deployment quota | GPT-4o has regional quota limits (250K TPM per region) | Check quota before deployment; try eastus2, swedencentral, or westus3 |
+| Guest user limitations | Guest users cannot start Fabric trials; cannot be Fabric capacity admins (Lesson 7, 37) | Use native tenant member account; ask admin to provision capacity |
+| Enterprise RBAC policies | Group-inherited roles don't always appear in CLI; may lack UAA role | Use Portal for role verification; pass `deployRbac: false` if lacking UAA |
+| "Do Not Allow Public IPs" policy | Blocks all public IP resources (VMs, Bastion PIPs) | Use `deployPublicIp: false`, `deployBastion: true`; access via Bastion |
+| App registration restrictions | Enterprise policy may block SP creation | Ask Application Administrator to create SP with Contributor role |
+| Managed identity in Fabric UI | Fabric "Add people" panel doesn't support service principals | Use Fabric REST API to assign roles: `POST /v1/workspaces/{id}/roleAssignments` |
 
 ---
 
@@ -210,24 +222,28 @@ This is not data duplication in the traditional sense. The search index is a der
 ### Infrastructure as Code (Bicep)
 
 #### `main.bicep` — Main Orchestrator Template
-**What it does:** Composes all Bicep modules into a single deployment. Defines the top-level parameters (location, prefix, VM credentials, user ID) and wires module outputs as inputs to dependent modules.
+**What it does:** Composes all Bicep modules into a single deployment. Defines top-level parameters and wires module outputs as inputs to dependent modules.
 
 **Key design decisions:**
-- Uses module composition (not a monolithic template) for readability
-- AI Services module deploys before AI Foundry (Foundry needs the resource IDs)
-- ANF module depends on networking module (needs the delegated subnet ID)
-- All outputs are surfaced for use by the PowerShell scripts
+- Uses module composition (not monolithic template) for readability and reusability
+- AI Services deploys before AI Foundry (Foundry needs resource IDs)
+- ANF module depends on networking module (needs delegated subnet ID)
+- All outputs are surfaced for PowerShell scripts
+- Includes enterprise-friendly conditionals for RBAC and public IP restrictions
 
 **Parameters:**
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `location` | string | — | Azure region (must support GPT-4o) |
-| `prefix` | string | `ragworkshop` | Name prefix for all resources (3-15 chars, lowercase) |
+| `location` | string | — | Azure region (must support GPT-4o: eastus2, swedencentral, westus3) |
+| `prefix` | string | `ragworkshop` | Name prefix for all resources (3-15 chars, lowercase, max 15 for Windows computer name) |
 | `vmAdminUsername` | string | `azureuser` | Gateway VM admin username |
-| `vmAdminPassword` | securestring | — | Gateway VM admin password |
-| `userObjectId` | string | — | Your Azure AD object ID (for RBAC) |
-| `anfPoolSizeTiB` | int | `2` | ANF capacity pool size |
-| `anfVolumeQuotaGiB` | int | `100` | ANF volume quota |
+| `vmAdminPassword` | securestring | — | Gateway VM admin password (min 12 chars, complexity required) |
+| `userObjectId` | string | — | Your Azure AD object ID (use `az ad signed-in-user show --query id -o tsv`) |
+| `anfPoolSizeTiB` | int | `2` | ANF capacity pool size (minimum 2 TiB for Standard tier; 1 TiB for Flexible) |
+| `anfVolumeQuotaGiB` | int | `100` | ANF volume quota in GiB |
+| `deployRbac` | bool | `true` | Set to `false` if you lack User Access Administrator role (Code Change 1) |
+| `deployPublicIp` | bool | `true` | Set to `false` if subscription has "Do Not Allow Public IPs" policy (Code Change 2) |
+| `deployBastion` | bool | `true` | Set to `true` to deploy Azure Bastion for RDP access when public IP is blocked (Code Change 6) |
 
 #### `main.bicepparam` — Sample Parameters File
 **What it does:** Provides a sample parameter file that reads sensitive values from environment variables (`VM_ADMIN_PASSWORD`, `USER_OBJECT_ID`). Edit this file or pass parameters directly on the command line.
@@ -252,26 +268,36 @@ This is not data duplication in the traditional sense. The search index is a der
 
 **Resources created:**
 - **NetApp Account** (`{prefix}-netapp`)
-- **Capacity Pool** (`{prefix}-pool`): Standard service level, minimum 2 TiB
-- **Volume** (`anf-finance-vol`): 100 GiB NFS volume with NFSv3 protocol
+- **Capacity Pool** (`{prefix}-pool`): Standard or Flexible service level
+- **Volume** (`anf-finance-vol`): 100 GiB NFS volume with **Standard network features** (Code Change 3)
 
-**Why NFSv3:** Simpler protocol, widely compatible, sufficient for this use case. NFSv4.1 adds Kerberos authentication which is unnecessary for this workshop.
+**Critical: Network Features**
+- Volume MUST be created with `networkFeatures: 'Standard'` for Object REST API (S3-compatible bucket access) to work
+- Default is Basic, which causes silent bucket creation failures (Lesson 11)
+- If already deployed with Basic, upgrade via: `az netappfiles volume update ... --network-features Standard` (takes 15-30 minutes)
 
-**Note:** The S3-compatible bucket is NOT created here — it's created by the PowerShell script (`02-configure-anf-bucket.ps1`) because bucket creation requires the preview REST API and certificate upload, which Bicep doesn't cleanly support.
+**Why NFSv3:** Simpler protocol, widely compatible. NFSv4.1 adds Kerberos authentication which is unnecessary for this workshop.
+
+**Note:** The S3-compatible bucket is NOT created by Bicep — it's created by PowerShell script `02-configure-anf-bucket.ps1` because bucket creation requires preview REST API and TLS certificate upload, which Bicep doesn't support cleanly.
 
 ---
 
 #### `modules/gateway-vm.bicep` — Data Gateway VM
-**What it does:** Creates a Windows Server VM that will host the On-Premises Data Gateway.
+**What it does:** Creates a Windows Server VM that will host the On-Premises Data Gateway (OPDG).
 
 **Resources created:**
-- **Public IP** (`{prefix}-gateway-pip`): Static, Standard SKU — for RDP access and internet connectivity
+- **Public IP** (`{prefix}-gateway-pip`): Optional, Static, Standard SKU — skipped if `deployPublicIp: false` (Code Change 2)
 - **NIC** (`{prefix}-gateway-nic`): Connected to the default subnet
-- **VM** (`{prefix}-gateway-vm`): Windows Server 2022 Datacenter, Standard_D2s_v3
+- **VM** (`{prefix}-gateway-vm`): Windows Server 2022+ Datacenter, Standard_D2s_v3
 
-**Why this VM exists:** Microsoft Fabric requires a Data Gateway to access private/VNet-isolated S3-compatible endpoints. The gateway software runs as a Windows service and bridges connectivity between OneLake and the ANF Object REST API endpoint. Azure NetApp Files itself does not require a gateway.
+**Why this VM exists:** Microsoft Fabric requires a Data Gateway to access private VNet-isolated S3 endpoints. The gateway bridges connectivity between OneLake and the ANF Object REST API. ANF itself does not require a gateway.
 
-**The gateway software is NOT installed by Bicep.** Installation happens in a later step via the `install-gateway.ps1` script executed through `az vm run-command`.
+**Enterprise Considerations:**
+- If subscription has "Do Not Allow Public IPs" policy, set `deployPublicIp: false` — use Azure Bastion for RDP instead (Code Change 6)
+- Windows computer name is auto-derived from prefix, guaranteed ≤15 chars to comply with Windows NETBIOS limits (Code Change 5, Lesson 18)
+- If prefix + "gw" exceeds 15 chars, computer name is automatically truncated
+
+**Gateway software installation:** NOT done by Bicep. Happens later via `install-gateway.ps1` using `az vm run-command invoke` (Code Change 7, Lesson 19).
 
 ---
 
@@ -302,17 +328,21 @@ This is not data duplication in the traditional sense. The search index is a der
 ---
 
 #### `modules/ai-foundry.bicep` — AI Foundry Hub + Project
-**What it does:** Creates the AI Foundry workspace hierarchy and connects it to AI Search and AI Services.
+**What it does:** Creates the AI Foundry (now called Microsoft Foundry) workspace hierarchy and connects it to AI Search and AI Services (Lesson 52).
 
 **Resources created:**
-- **Storage Account** (`{prefix}hubstore`): Required dependency for the AI Hub (stores experiment data, logs)
-- **Key Vault** (`{prefix}-hub-kv`): Required dependency for the AI Hub (stores secrets, connection strings)
-- **AI Hub** (`{prefix}-hub`): The top-level workspace (kind: `Hub`) with system-assigned managed identity
-- **AI Services Connection**: Links the Hub to the AI Services account (AAD auth)
-- **AI Search Connection**: Links the Hub to the AI Search service (AAD auth)
-- **AI Project** (`{prefix}-project`): The working project (kind: `Project`) under the Hub
+- **Storage Account** (`{prefix}hubstore`): Required dependency (stores experiment data, logs)
+- **Key Vault** (`{prefix}-hub-kv`): Required dependency (stores secrets, connection strings)
+- **AI Hub** (`{prefix}-hub`): Top-level workspace (kind: `Hub`) with system-assigned managed identity
+- **AI Services Connection**: Links Hub to AI Services account (AAD auth)
+- **AI Search Connection**: Links Hub to AI Search service (AAD auth)
+- **AI Project** (`{prefix}-project`): Working project (kind: `Project`) under the Hub
 
-**Why Hub + Project:** AI Foundry uses a two-level hierarchy. The Hub owns shared resources (connections, compute). The Project is where agents, evaluations, and experiments live. Connections defined at the Hub level are inherited by all Projects.
+**Important Notes:**
+- Portal branding shows "Microsoft Foundry" but URL remains ai.azure.com (Lesson 52)
+- Hub-level connections are inherited by all projects (shared connections at Hub layer)
+- Managed identities for AI Search must be added via Fabric REST API, NOT the Fabric UI (Lesson 44)
+- Two-level hierarchy: Hub owns shared resources; Project is where agents/evaluations/experiments live
 
 ---
 
@@ -364,13 +394,23 @@ This is not data duplication in the traditional sense. The search index is a der
 **What it does:** Creates the S3-compatible bucket on the ANF volume and generates access credentials.
 
 **Steps:**
-1. If no certificate is provided, generates a self-signed X.509 certificate using `openssl`
-2. Reads the certificate PEM content
-3. Creates the bucket via the Azure ARM REST API (`PUT .../volumes/{vol}/buckets/{bucket}`)
-4. Generates access credentials (access key + secret key) via REST API
-5. Returns the endpoint URL, access key, secret key, and certificate path
+1. Generates a self-signed X.509 certificate using `openssl` (if not provided)
+2. Base64-encodes the certificate (Code Change 4: Lesson 13)
+3. Creates the bucket via ARM REST API (`PUT .../volumes/{vol}/buckets/{bucket}`)
+4. Generates access credentials via REST API (Code Change 4: Lesson 16)
+5. Returns endpoint URL, access key, secret key, certificate path
 
-**Why REST API instead of Bicep:** The ANF bucket creation with certificate upload works most reliably through the REST API. The bucket resource is preview-only and requires the certificate content inline.
+**Critical Fixes (Code Change 4):**
+- **UID/GID must be 1000, NOT 0** (Lesson 15): Root (UID 0) is a system user in ONTAP, rejected silently. Bucket creation returns 201 "Accepted" but GET returns `NoBucketFound`
+- **generateCredentials requires `keyPairExpiryDays` parameter** (Lesson 16): Pass `{"keyPairExpiryDays": 365}`, not empty body
+- **Certificate must be base64-encoded combined PEM** (Lesson 13): Concatenate cert + key, then base64 encode
+
+**Debugging bucket creation failures:**
+- Bucket PUT returns 201 "Accepted" even if it will fail asynchronously
+- Check Azure Activity Log (Lesson 17): `az monitor activity-log list --resource-group <rg> --offset 1h --query "[?contains(operationName.value,'bucket')]" -o table`
+- Look for `Started → Accepted → Failed` sequence; actual error is in `statusMessage`
+
+**Why REST API instead of Bicep:** Bucket resource is preview-only. Bicep doesn't cleanly support inline certificate content and requires base64 encoding, which is easier in PowerShell.
 
 ---
 
@@ -386,18 +426,34 @@ This is not data duplication in the traditional sense. The search index is a der
 ---
 
 #### `scripts/gateway/install-gateway.ps1` — Gateway Installation
-**What it does:** Runs ON the gateway VM (not on your local machine). Installs and registers the On-Premises Data Gateway.
+**What it does:** Runs ON the gateway VM (not on your local machine). Installs the On-Premises Data Gateway and imports the ANF TLS certificate.
 
-**Steps:**
-1. Downloads the gateway installer from Microsoft
-2. Runs silent installation (`/quiet ACCEPTEULA=yes`)
-3. Installs PowerShell 7 if not present (DataGateway module requires PS7+)
-4. Installs the `DataGateway` PowerShell module
-5. Authenticates using the Service Principal (`Connect-DataGatewayServiceAccount`)
-6. Registers the gateway (`Install-DataGateway -RegionKey`)
-7. Optionally imports the ANF TLS certificate to the Windows trusted root store
+**Code Change 7 (Major Rewrite):**
+- Original script relied on Service Principal registration (blocked in enterprise tenants — Lesson 4)
+- New script uses `az vm run-command invoke` for reliable remote execution (Lesson 19)
+- Registration is now **interactive** — requires RDP into VM and manual gateway sign-in via OPDG UI
 
-**How it's invoked:** The main `deploy.ps1` script runs this on the VM using `az vm run-command invoke`, which executes PowerShell commands remotely on the VM without needing RDP.
+**Steps (New Approach):**
+1. **InstallOPDG action:**
+   - Downloads gateway installer from Microsoft
+   - Runs silent installation (`/quiet ACCEPTEULA=yes`)
+   - Verifies `PBIEgwService` Windows service is running
+   - Cleans up installer file
+2. **ImportCert action:**
+   - Uses TcpClient/SslStream to retrieve self-signed cert from ANF endpoint IP
+   - Imports cert to LocalMachine\Root (Trusted Root Certification Authorities)
+   - Verifies import via certificate thumbprint
+3. **All action:** Runs both InstallOPDG and ImportCert sequentially
+
+**After Installation (Manual Steps — RDP Required):**
+1. RDP into gateway VM via Azure Bastion (if public IP blocked — Lesson 26-29)
+2. Open **On-Premises Data Gateway Configurator** (should auto-launch post-install)
+3. Click **Sign in** and authenticate with your Azure work account
+4. Select the **correct tenant** if you belong to multiple tenants (Lesson 38)
+5. Enter gateway name (e.g., `ANF-Gateway`)
+6. Verify status shows **"Online"** and **"Microsoft Fabric: Default environment - Ready"** (Lesson 38)
+
+**How it's invoked:** The main `deploy.ps1` script runs this on the VM using `az vm run-command invoke` (no RDP needed for install itself; RDP only needed for the registration UI step).
 
 ---
 
@@ -406,15 +462,20 @@ This is not data duplication in the traditional sense. The search index is a der
 
 **Steps:**
 1. Authenticates to Fabric using the Service Principal (OAuth2 client_credentials flow)
-2. Creates workspace `Financial_RAG_Workshop` (or finds existing)
+2. Creates workspace `Financial_RAG_Workshop` (or finds existing) with capacity assignment
 3. Creates lakehouse `FinDataLake` (or finds existing)
-4. Discovers the registered Data Gateway
+4. Discovers the registered Data Gateway (must be online and Fabric-ready)
 5. Creates an S3-compatible connection using the gateway + ANF credentials
 6. Creates a OneLake shortcut `anf_shortcut` pointing to the ANF bucket
 
-**Why Fabric REST API:** Fabric is a SaaS service. It cannot be deployed via ARM/Bicep. The only automation path is the Fabric REST API (`api.fabric.microsoft.com/v1/...`).
+**⚠️ CRITICAL ENTERPRISE BLOCKERS (Lessons 35-36):**
+- **Fabric capacity is REQUIRED** (F SKU trial or paid) — free tier does NOT support gateways
+- **Guest users cannot start trials** (Lesson 37) — ask tenant admin to provision capacity
+- **Gateway must be Online and Fabric-Ready** — if offline, shortcut creation fails silently
 
-**Authentication:** Uses OAuth2 client credentials flow with the Service Principal. The SP must have Fabric API permissions granted by the Fabric admin.
+**Why Fabric REST API:** Fabric is SaaS, not deployable via ARM/Bicep. The only automation path is Fabric REST API (`api.fabric.microsoft.com/v1/...`).
+
+**Authentication:** Uses OAuth2 client credentials with Service Principal. SP must have Fabric API permissions (enabled in tenant settings by Fabric admin).
 
 ---
 
@@ -422,8 +483,9 @@ This is not data duplication in the traditional sense. The search index is a der
 **What it does:** Creates the search data source, skillset (with Document Intelligence), index, and indexer — then runs the indexer and waits for completion.
 
 **Resources created via REST API:**
-1. **Data Source** (`onelake-datasource`): Type `onelake`, pointing to the Fabric workspace and lakehouse, scoped to the shortcut folder
-2. **Skillset** (`rag-workshop-skillset`): A 3-skill pipeline using native built-in Azure AI Search skills:
+1. **Data Source** (`onelake-datasource`): Type `onelake`, pointing to Fabric workspace/lakehouse/shortcut, with managed identity authentication
+
+2. **Skillset** (`rag-workshop-skillset`): A 3-skill pipeline using native Azure AI Search built-in skills:
 
    ```
    Document → Document Intelligence Layout → Split → Embedding → Index
@@ -431,18 +493,23 @@ This is not data duplication in the traditional sense. The search index is a der
 
    | Skill | OData Type | Purpose |
    |-------|------------|---------|
-   | **Document Intelligence Layout** | `Microsoft.Skills.Util.DocumentIntelligenceLayoutSkill` | Built-in AI Search skill. Extracts structured content (tables, key-value pairs, headings) as Markdown from PDFs, Office docs, images, and HTML. Handles OCR internally. |
-   | **Text Splitter** | `Microsoft.Skills.Text.SplitSkill` | Chunks the extracted Markdown into ~2000 character pages with 500 character overlap |
-   | **Embedding** | `Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill` | Generates 1536-dimensional vectors for each chunk using `text-embedding-3-small` |
+   | **Document Intelligence Layout** | `Microsoft.Skills.Util.DocumentIntelligenceLayoutSkill` | Built-in AI Search skill. Extracts structured content (tables, key-value pairs, headings) as Markdown from PDFs, Office docs, images, and HTML. OCR is internal. Uses AI Services account. |
+   | **Text Splitter** | `Microsoft.Skills.Text.SplitSkill` | Chunks extracted Markdown into ~2000 character pages with 500 char overlap |
+   | **Embedding** | `Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill` | Generates 1536-dim vectors using `text-embedding-3-small`. **IMPORTANT (Lesson 49):** Use "Microsoft Foundry" Kind, NOT "Azure OpenAI". |
 
-   **All three skills are native Azure AI Search built-in skills.** Document Intelligence Layout runs through the AI Services multi-service account (same resource used for embeddings). No external microservices or custom skills needed.
+   **All three skills are native Azure AI Search built-in skills** — no external microservices or custom code needed. Document Intelligence Layout runs through the AI Services multi-service account.
 
-   **Index projections**: Maps parent documents to child chunks with parent-child key relationships (`projectionMode: generatedKeyAsId`)
+3. **Index** (`rag-workshop-index`): Fields include `chunk` (searchable text), `vector` (1536-dim HNSW), `title`, `source_url`, `parent_id`. Semantic search enabled.
 
-3. **Index** (`rag-workshop-index`): Fields include `chunk` (searchable text), `vector` (1536-dim HNSW), `title`, `source_url`, and `parent_id`. Configured with semantic search.
-4. **Indexer** (`rag-workshop-indexer`): Runs once, extracts content and metadata, provides raw file bytes to the skillset (`allowSkillsetToReadFileData: true`), passes content through the 3-skill pipeline
+4. **Indexer** (`rag-workshop-indexer`): Runs once, extracts content/metadata, provides raw file bytes to skillset (`allowSkillsetToReadFileData: true`), passes content through 3-skill pipeline. Uses managed identity for OneLake auth.
 
-**After creation:** The script runs the indexer and polls for completion (up to 5 minutes). It reports the number of documents indexed.
+**After creation:** The script runs the indexer and polls for completion (up to 5 minutes). It reports document count. Check Activity Log if indexer fails (Lesson 17, 44).
+
+**Enterprise RBAC Note (Lesson 44):** The AI Search managed identity must be added to the Fabric workspace as Contributor. The Fabric UI "Add people" panel does NOT support managed identities — use the Fabric REST API:
+```
+POST https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/roleAssignments
+Body: { "principal": { "id": "<MI-ObjectID>", "type": "ServicePrincipal" }, "role": "Contributor" }
+```
 
 ---
 
@@ -487,7 +554,7 @@ Complete ALL of the following before running the deployment script.
 
 ### A. Install Required Tools
 
-Run these on the machine where you will execute the deployment (your local workstation or a cloud shell):
+Run these on the machine where you will execute the deployment (your local workstation, Azure Cloud Shell, or CI/CD pipeline):
 
 ```bash
 # 1. Azure CLI
@@ -498,7 +565,7 @@ winget install Microsoft.AzureCLI
 # Linux
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-# 2. PowerShell 7+
+# 2. PowerShell 7+ (REQUIRED for the deploy.ps1 script)
 # macOS
 brew install powershell/tap/powershell
 # Windows — already included or install from:
@@ -507,16 +574,19 @@ brew install powershell/tap/powershell
 sudo apt-get install -y powershell
 
 # 3. AWS CLI (for S3 data upload)
-# macOS
-brew install awscli
-# Windows
-winget install Amazon.AWSCLI
-# Linux
-sudo apt-get install -y awscli
+# Azure Cloud Shell NOTE: AWS CLI is NOT pre-installed. Install via:
+pip install awscli --user --quiet
+# Then add to PATH: $env:PATH = "$HOME/.local/bin:$env:PATH"
+# Or on local machine:
+# macOS: brew install awscli
+# Windows: winget install Amazon.AWSCLI
+# Linux: sudo apt-get install -y awscli
 
 # 4. openssl (usually pre-installed; only needed if not providing your own cert)
 openssl version
 ```
+
+**⚠️ Cloud Shell Note:** Azure Cloud Shell ships with Azure CLI and PowerShell but does **NOT** include AWS CLI by default. Install it via `pip` as shown above, or skip data upload and upload test data manually to the ANF bucket from the gateway VM.
 
 ### B. Azure Login and Subscription
 
@@ -533,20 +603,36 @@ az account set --subscription "<SUBSCRIPTION_ID>"
 
 ### C. Verify Subscription Permissions
 
+**IMPORTANT ENTERPRISE NOTE:** Your user may lack sufficient RBAC role assignment permissions, which is common in enterprise environments where roles are group-inherited.
+
 ```bash
-# Check your role on the subscription (need Owner or Contributor + User Access Admin)
+# Check your role on the subscription (need Contributor minimum)
+# NOTE: If this returns empty, use the Azure Portal instead
 az role assignment list --assignee $(az ad signed-in-user show --query id -o tsv) \
     --scope /subscriptions/$(az account show --query id -o tsv) \
     --query '[].roleDefinitionName' -o table
 ```
 
+**Alternative (Recommended for Enterprise):** Open the Azure Portal → **Subscriptions** → **Access control (IAM)** → **View my access**. This shows all roles including those inherited through groups.
+
+**Required minimum:** Contributor role on the subscription. If you lack **User Access Administrator** role:
+- The Bicep deployment will skip the `Cognitive Services OpenAI User` RBAC assignment (pass `-DeployRbac $false`)
+- Manually assign the role after deployment via the portal, or ask your admin to pre-assign it
+
 ### D. Ensure Object REST API Preview is Enabled
 
-The Azure NetApp Files Object REST API is in **Public Preview**. Your subscription must be approved.
+The Azure NetApp Files Object REST API is in **Public Preview**. Two preview features must be registered on your subscription:
 
-1. Go to [Azure NetApp Files Object REST API documentation](https://learn.microsoft.com/en-us/azure/azure-netapp-files/object-rest-api-introduction)
-2. Follow the enrollment process
-3. Verify enrollment status in the Azure portal under your subscription's "Preview features"
+1. **`ANFEnableObjectRESTAPI`** — Enables Object REST API on NetApp accounts
+2. **`ANFEnableS3ReadOnly`** — Enables read-only S3 access (pending in most subscriptions)
+
+**To verify/enable:**
+1. Go to [Azure Portal → Subscriptions → Preview features](https://portal.azure.com/#view/Microsoft_Azure_Resources/PreviewFeaturesBladeV2/~/listPreviewFeatures)
+2. Search for "ANFEnableObjectRESTAPI" — should show "Registered"
+3. Search for "ANFEnableS3ReadOnly" — may show "Pending" (this is OK)
+4. If either is missing, request access through the Azure Portal or contact Azure Support
+
+**If not already registered:** The deployment will still create the volume (Lesson 11: silent failure), but bucket creation will fail silently (GET returns `NoBucketFound` even though bucket creation returned "Accepted"). To fix, update the volume after deployment: `az netappfiles volume update --resource-group <rg> --account-name <account> --pool-name <pool> --volume-name <volume> --network-features Standard`
 
 ### E. Create a Service Principal
 
@@ -554,8 +640,10 @@ The Service Principal is used for two purposes:
 1. **Fabric REST API** authentication (creating workspace, lakehouse, connection, shortcut)
 2. **Data Gateway** registration on the VM
 
+**⚠️ ENTERPRISE BLOCKER (Lesson 4):** Many enterprise tenants have the Azure AD policy **"Users can register applications"** set to **No**. If you cannot create an app registration in the portal or via CLI, ask your tenant admin to create the Service Principal for you.
+
 ```bash
-# Create the Service Principal
+# Create the Service Principal (requires Application Administrator or Global Administrator role)
 SP_OUTPUT=$(az ad sp create-for-rbac \
     --name "rag-workshop-sp" \
     --role Contributor \
@@ -573,23 +661,40 @@ echo "Service Principal Secret: $SP_SECRET"
 echo "Tenant ID: $TENANT_ID"
 ```
 
+**If app registration fails:** Contact your Azure AD admin and provide them with the Service Principal name (`rag-workshop-sp`). Ask them to create it with **Contributor** role on your subscription.
+
 ### F. Grant Fabric Admin Permissions to the Service Principal
 
+**⚠️ ENTERPRISE BLOCKER (Lesson 4, 7):** Guest users cannot create Fabric capacity trials. If you're a guest in your organization's Azure AD tenant, ask your tenant admin to pre-provision Fabric capacity and assign your account as a capacity admin.
+
 1. Go to [app.fabric.microsoft.com](https://app.fabric.microsoft.com)
-2. Click the **gear icon** → **Admin portal**
+2. Click the **gear icon** (top right) → **Admin portal** (requires Fabric admin role)
 3. Under **Tenant settings**, find and enable:
    - **"Service principals can use Fabric APIs"** → Enable, add your SP to the allowed group (or allow entire organization)
    - **"Service principals can create and use gateways"** → Enable
 
+**If you cannot access Admin portal:** Ask your Fabric admin to enable these settings for you.
+
 ### G. Get Your Fabric Capacity ID
 
-1. In the Fabric Admin portal → **Capacity settings**
-2. Select your capacity (Trial or paid)
-3. Copy the **Capacity ID** (a GUID)
+**⚠️ ENTERPRISE REQUIREMENT (Lesson 35-37):** Fabric capacity (Trial F SKU or paid) is **REQUIRED** for this lab. The free Fabric tier does NOT support the On-Premises Data Gateway, which is essential for the OneLake shortcut to ANF.
 
-If you don't have a capacity, you can start a Fabric Trial:
-1. Go to [app.fabric.microsoft.com](https://app.fabric.microsoft.com)
-2. You'll be prompted to start a free trial
+1. Start a Fabric Trial (if available):
+   - Go to [app.fabric.microsoft.com](https://app.fabric.microsoft.com)
+   - Profile icon (top right) → **Start trial** (if available)
+   - Accept the Fabric capacity trial
+   - Wait 5-10 minutes for capacity to activate
+
+2. Get your Capacity ID:
+   - Gear icon → **Admin portal** → **Capacity settings** → Select your capacity
+   - Copy the **Capacity ID** (a GUID, e.g., `10858519-429f-40e3-8d49-ffb8c3820ca8`)
+
+**If "Start trial" is unavailable:**
+- You are a guest user in this tenant (cannot start trials — see Lesson 37)
+- Ask your tenant admin to create Fabric capacity (F2 or higher SKU) and assign it to your account
+- Or use the ARM API to get the capacity ID from an existing capacity: `az rest --method get --url "https://api.fabric.microsoft.com/v1/capacities" --resource "https://api.fabric.microsoft.com"`
+
+**If you only have access to Free tier:** You cannot complete this lab without capacity. The gateway dropdown will be empty and shortcuts cannot be created.
 
 ### H. Get Your User Object ID
 
@@ -647,19 +752,41 @@ cd ANF-OneLake-AIFoundry/automation
 # Switch to PowerShell if not already
 pwsh
 
-# Run the deployment
+# Standard deployment (most cases)
 ./deploy.ps1 `
-    -SubscriptionId       "<YOUR_SUBSCRIPTION_ID>" `
-    -Location             "eastus2" `
-    -ResourceGroupName    "rg-rag-workshop" `
-    -Prefix               "ragworkshop" `
-    -VmAdminPassword      (ConvertTo-SecureString "<YOUR_VM_PASSWORD>" -AsPlainText -Force) `
-    -VmAdminUsername      "azureuser" `
-    -UserObjectId         "<YOUR_USER_OBJECT_ID>" `
-    -ServicePrincipalAppId "<YOUR_SP_APP_ID>" `
-    -ServicePrincipalSecret "<YOUR_SP_SECRET>" `
-    -TenantId             "<YOUR_TENANT_ID>" `
-    -FabricCapacityId     "<YOUR_FABRIC_CAPACITY_ID>"
+    -SubscriptionId                "<YOUR_SUBSCRIPTION_ID>" `
+    -Location                      "eastus2" `
+    -ResourceGroupName             "rg-rag-workshop" `
+    -Prefix                        "ragworkshop" `
+    -VmAdminPassword               (ConvertTo-SecureString "<YOUR_VM_PASSWORD>" -AsPlainText -Force) `
+    -VmAdminUsername               "azureuser" `
+    -UserObjectId                  "<YOUR_USER_OBJECT_ID>" `
+    -ServicePrincipalAppId         "<YOUR_SP_APP_ID>" `
+    -ServicePrincipalSecret        "<YOUR_SP_SECRET>" `
+    -TenantId                      "<YOUR_TENANT_ID>" `
+    -FabricCapacityId              "<YOUR_FABRIC_CAPACITY_ID>"
+
+# Enterprise deployment (with policy restrictions)
+./deploy.ps1 `
+    -SubscriptionId                "<YOUR_SUBSCRIPTION_ID>" `
+    -Location                      "eastus2" `
+    -ResourceGroupName             "rg-rag-workshop" `
+    -Prefix                        "ragworkshop" `
+    -VmAdminPassword               (ConvertTo-SecureString "<YOUR_VM_PASSWORD>" -AsPlainText -Force) `
+    -VmAdminUsername               "azureuser" `
+    -UserObjectId                  "<YOUR_USER_OBJECT_ID>" `
+    -ServicePrincipalAppId         "<YOUR_SP_APP_ID>" `
+    -ServicePrincipalSecret        "<YOUR_SP_SECRET>" `
+    -TenantId                      "<YOUR_TENANT_ID>" `
+    -FabricCapacityId              "<YOUR_FABRIC_CAPACITY_ID>" `
+    -DeployRbac                    $false `
+    -DeployPublicIp                $false
+
+# Parameters explained:
+# -DeployRbac false                  Use if you lack User Access Administrator role (assign role manually after)
+# -DeployPublicIp false              Use if subscription has "Do Not Allow Public IPs" policy (requires Bastion)
+# -SkipInfrastructure                Skip Bicep deployment if already deployed
+# -SkipFabric                        Skip Fabric configuration if already configured
 ```
 
 ### What You'll See
@@ -734,17 +861,47 @@ The script outputs progress for each step:
 
 ### Expected Duration
 
-| Step | Duration |
-|------|----------|
-| Resource provider registration | ~1 minute |
-| Bicep deployment | ~15 minutes (ANF volume creation is the slowest part) |
-| ANF bucket + credential creation | ~2 minutes |
-| Data upload | ~1 minute |
-| Gateway install + registration | ~5 minutes |
-| Fabric configuration | ~2 minutes |
-| AI Search indexing | ~3 minutes |
-| Agent creation + test | ~1 minute |
-| **Total** | **~25-30 minutes** |
+| Step | Duration | Enterprise Notes |
+|------|----------|------------------|
+| Resource provider registration | ~1 minute | If not already registered |
+| Bicep deployment | ~15-20 minutes | ANF volume creation is slowest part; network features upgrade takes 15-30 min if needed |
+| ANF bucket + credential creation | ~2-3 minutes | If network features need upgrade, add 15+ min; check Activity Log for silent failures |
+| Data upload | ~1 minute | Cloud Shell: install AWS CLI first (`pip install awscli --user --quiet`) |
+| Gateway install | ~5 minutes | Runs via `az vm run-command invoke` (no RDP needed for install) |
+| Gateway registration | ~5 minutes (manual) | Requires RDP via Bastion; interactive OPDG Configurator sign-in |
+| Fabric configuration | ~3-5 minutes | Depends on Fabric capacity activation; guest user trials may be blocked |
+| AI Search indexing | ~3-5 minutes | Check Activity Log if indexer fails; AI Search MI must be added to Fabric workspace |
+| Agent creation + test | ~2 minutes | First query may not trigger knowledge tool; try broader query first |
+| **Total (automated)** | **~30-45 minutes** | Plus manual gateway registration (5 min) if using interactive sign-in |
+
+### Important Notes for Enterprise Deployments
+
+1. **Bicep Redeployment:** If full deployment fails partway, do NOT re-run the full `main.bicep`. Instead, deploy only the failed module independently to avoid cascading validation errors on already-deployed resources (Lesson 10).
+
+2. **ANF Network Features Upgrade:** If volume deployed with Basic networking features, upgrade to Standard takes 15-30+ minutes as a background operation. Check `provisioningState` repeatedly. Bucket creation will silently fail until upgrade completes.
+
+3. **Bucket Creation Silent Failure Pattern:** PUT returns 201 "Accepted" even when bucket creation will fail. Always check Activity Log immediately after bucket creation:
+   ```
+   az monitor activity-log list --resource-group <rg> --offset 1h \
+     --query "[?contains(operationName.value,'bucket')].{op:operationName.value,status:status.value,msg:properties.statusMessage}" -o table
+   ```
+
+4. **Gateway Registration Requirements:** Interactive registration via RDP is required. The script installs OPDG via remote execution, but:
+   - You MUST RDP into the VM via Azure Bastion (if no public IP)
+   - Open OPDG Configurator and click **Sign in**
+   - Authenticate with your Azure account (select correct tenant if multi-tenant)
+   - Enter gateway name and verify status shows **"Online"** and **"Microsoft Fabric: Ready"**
+   - Without proper registration, the gateway will be invisible to Fabric even if online
+
+5. **Fabric Capacity Requirement:** The entire OneLake → AI Search → Agent flow requires Fabric capacity (F SKU trial or paid). Free tier does NOT support On-Premises Data Gateway. If you only have free tier, the gateway dropdown will remain empty and shortcuts cannot be created.
+
+6. **AI Search Managed Identity Assignment:** The AI Search managed identity must be added to the Fabric workspace as Contributor. The Fabric UI "Add people" panel does NOT support service principals — use the REST API:
+   ```
+   az rest --method post --url "https://api.fabric.microsoft.com/v1/workspaces/{workspaceId}/roleAssignments" \
+     --body '{"principal":{"id":"<MI-ObjectID>","type":"ServicePrincipal"},"role":"Contributor"}'
+   ```
+
+7. **Azure Bastion Single-Session Limit:** If using Azure Bastion Developer tier (deployed with this script), only one RDP session is allowed at a time. Complete all VM tasks in one session before disconnecting.
 
 ---
 
@@ -854,55 +1011,132 @@ The auto-generated TLS certificate expires after 365 days. To renew:
 
 ## 9. Troubleshooting Reference
 
+### Pre-Deployment Blockers (Fix These First)
+
+| Issue | Impact | Solution |
+|-------|--------|----------|
+| Cannot create app registration | Service Principal cannot be created | Enterprise policy blocks app registration. Ask tenant admin to create SP (`rag-workshop-sp` with Contributor role) |
+| Lack User Access Administrator role | RBAC assignment will fail | Pass `-DeployRbac $false` to Bicep. Manually assign `Cognitive Services OpenAI User` role after deployment via portal |
+| "Do Not Allow Public IPs" policy | VM creation fails with RequestDisallowedByPolicy | Pass `-DeployPublicIp $false` and `-DeployBastion $true`. Use Azure Bastion for RDP access |
+| No Fabric capacity trial option | Cannot complete lab without Fabric F SKU | You are a guest user. Ask tenant admin to create Fabric capacity (F2+ SKU) and assign to your account |
+| Object REST API preview not enabled | Bucket creation fails silently (GET returns NoBucketFound) | Request `ANFEnableObjectRESTAPI` feature flag enrollment via Azure Preview Features blade |
+| AWS CLI not installed (Cloud Shell) | Data upload fails with "aws: command not found" | Install in Cloud Shell: `pip install awscli --user --quiet && $env:PATH = "$HOME/.local/bin:$env:PATH"` |
+
 ### Bicep Deployment Failures
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `SubnetDelegationNotFound` | ANF subnet delegation missing | Check `networking.bicep` creates the delegation properly |
-| `CapacityPoolSizeTooSmall` | Pool size below minimum | Use minimum 2 TiB |
-| `QuotaExceeded` | Regional quota for VM size or models | Try a different region or request quota increase |
-| `ResourceProviderNotRegistered` | Provider not registered | Run `01-register-providers.ps1` first |
-| `InvalidModelVersion` | Model version not available in region | Check available versions in your region |
+| `RequestDisallowedByPolicy` on PublicIP resource | "Do Not Allow Public IPs" Azure Policy | Pass `deployPublicIp: false` to deploy.ps1 |
+| `AuthorizationFailed` on RBAC role assignment | User lacks User Access Administrator role | Pass `deployRbac: false`; assign role manually after deployment |
+| `SubnetDelegationNotFound` | ANF subnet delegation missing | Verify subnet has delegation to `Microsoft.NetApp/volumes` |
+| `CapacityPoolSizeTooSmall` | Minimum 2 TiB for Standard tier | Use Standard (2 TiB min) or Flexible (1 TiB min) |
+| `QuotaExceeded` | Regional quota for VM or models (GPT-4o) | Try different region or request quota increase. GPT-4o available in: eastus2, swedencentral, westus3 |
+| `InvalidModelVersion` | Model version unavailable in region | Check Azure OpenAI model availability for your region |
 
-### ANF Bucket Issues
+### ANF Bucket Issues (Silent Failures!)
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `FeatureNotEnabled` | Object REST API not approved | Request preview access for your subscription |
-| Certificate errors | Malformed PEM or wrong format | Regenerate with the openssl command shown above |
-| `403 Forbidden` on S3 operations | Wrong access key/secret | Regenerate credentials via portal |
+| **Bucket PUT returns 201 but GET returns NoBucketFound** | Network features not Standard (Lesson 11) | Patch volume: `az netappfiles volume update ... --network-features Standard` (takes 15-30 min) |
+| **Bucket PUT returns 201 but Activity Log shows Failed** | UID/GID 0 (root) rejected (Lesson 15) | Check Activity Log: `az monitor activity-log list --resource-group <rg> --offset 1h --query "[?contains(operationName.value,'bucket')]"` |
+| **Bucket creation: "Could not extract Private Key from PEM"** | Certificate is cert-only, missing private key (Lesson 12) | Combine cert + key: `cat cert.pem private.key > combined.pem`. Base64 encode before REST API call. |
+| **Bucket creation: certificate FQDN mismatch** | FQDN doesn't match cert CN (Lesson 21) | Regenerate cert with correct CN: `openssl req -x509 ... -subj "/CN=anf-workshop"` |
+| `403 Forbidden` on S3 operations | Wrong access key/secret | Regenerate credentials via portal or script; verify User ID is 1000 not 0 |
+| `FeatureNotEnabled` | Object REST API preview not enrolled | Request enrollment via Azure Preview Features blade |
 
 ### Gateway Issues
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| Gateway shows "Offline" | Service not running or auth failed | RDP into VM, check gateway service in Windows Services |
-| Registration fails | SP doesn't have Fabric permissions | Check Fabric Admin portal settings |
-| PowerShell module not found | PS7 not installed | Install via `https://aka.ms/install-powershell.ps1` |
+| **Gateway dropdown empty in Fabric connection dialog** | Fabric free tier (no capacity) — gateway requires F SKU (Lessons 35-36) | Create/use Fabric Trial or paid capacity (F2+). Gateways do NOT work on free tier. |
+| Gateway shows "Offline" in Fabric | Service crashed or auth failed | RDP via Bastion; check Windows Services for `PBIEgwService` (running?); restart service |
+| OPDG registration fails | SP permissions missing or wrong tenant | Sign in with correct account; verify tenant; check Fabric admin settings for "Service principals can create/use gateways" |
+| **Computer name exceeds 15 chars** | Windows NETBIOS limit (Lesson 18) | Prefix+13 chars max. Script auto-truncates via `take('${prefix}gw', 15)` |
+| `--no-wait` deployment silently fails | Error hidden; only visible in deployment group list (Lesson 19) | Re-run without `--no-wait` to see actual error. Check `az deployment group list` for status. |
+| RDP access denied (no public IP) | "Do Not Allow Public IPs" policy (Lesson 26) | Use Azure Bastion (Developer tier, single-session — see Lesson 29) |
 
 ### Fabric Issues
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `403` on workspace creation | SP not authorized for Fabric APIs | Enable SP access in Fabric Admin portal |
-| Shortcut shows empty | Gateway offline or wrong endpoint | Verify gateway status; verify ANF endpoint URL |
-| Connection test fails | Network path blocked | Ensure VM can reach ANF IP on port 443 |
+| `403` on workspace creation | SP not authorized for Fabric APIs | Fabric admin must enable "Service principals can use Fabric APIs" in tenant settings |
+| Shortcut shows empty | Gateway offline or S3 endpoint unreachable | Verify gateway is **Online** and **Fabric-Ready** in OPDG Configurator. Verify ANF endpoint URL matches bucket FQDN. |
+| S3 connection fails with DNS error | FQDN not resolvable (private endpoint) | Add hosts file entry on gateway VM: `echo "10.0.2.4 anf-workshop" >> C:\Windows\System32\drivers\etc\hosts` (Lesson 24) |
+| "Cannot add managed identity via Add people" | Fabric UI doesn't support service principals (Lesson 44) | Use Fabric REST API: `POST /v1/workspaces/{id}/roleAssignments` with `"type": "ServicePrincipal"` |
 
 ### AI Search Issues
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| Indexer returns 0 documents | Shortcut empty or wrong path | Verify OneLake shortcut has files; check `container.query` path |
-| Indexer `403` error | MI not authorized on Fabric workspace | Add Search MI as Contributor on workspace |
-| Embedding skill fails | Wrong AI Services endpoint or key | Verify `ai-services` endpoint and key |
+| Indexer returns 0 documents | OneLake shortcut is empty or MI not authorized (Lesson 44) | Verify shortcut has files; add Search MI as Contributor to Fabric workspace via REST API |
+| Indexer `403 Unauthorized` | Managed identity not granted access to Fabric workspace | Add AI Search MI to workspace: `az rest --method post --url "https://api.fabric.microsoft.com/v1/workspaces/{id}/roleAssignments" ...` |
+| Embedding skill fails with "No access to subscription" | "Azure OpenAI" Kind selected (Lesson 49) | **Change Kind from "Azure OpenAI" to "Microsoft Foundry"**. Select your Foundry project and `text-embedding-3-small` deployment. |
+| **Vectorization wizard: scenario selection missing** | New UI step not documented (Lesson 46) | Select **"RAG"** as target scenario in the first wizard step |
+| **Vectorization: "Lakehouse URL" field invalid format** | Lakehouse URL not in correct format (Lesson 47) | Use full format: `https://msit.powerbi.fabric.microsoft.com/groups/{workspaceGuid}/lakehouses/{lakehouseGuid}` (copy from Fabric UI address bar) |
 
 ### Agent Issues
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| "I don't have access to data" | Search connection not configured | Verify AI Search connection in AI Hub |
-| Agent returns hallucinated data | Index is empty or misconfigured | Check index document count; re-run indexer |
-| `401 Unauthorized` | Token expired or wrong resource | Re-run `az login`; verify token resource is `https://ai.azure.com` |
+| Agent: "I don't have access to data" | AI Search connection not configured | Verify AI Search connection exists in AI Hub; ensure connection is added to project |
+| Agent: "Please provide the financial data" on first query | Knowledge tool not triggered for very specific queries (Lesson 64) | Try a broader query first ("What financial documents are available?") to establish context, then ask specific questions |
+| Agent: Returns generic response without citations | Index is empty or AI Search not connected | Check index document count (should be > 0); verify indexer completed successfully |
+| **"Azure OpenAI" Kind doesn't find deployments** | Kind should be "Microsoft Foundry" (Lesson 49) | Change to "Microsoft Foundry"; select your Foundry project |
+| `401 Unauthorized` on agent requests | Token expired or wrong resource scope | Run `az login` again; verify token resource is `https://ai.azure.com` not `https://management.azure.com` |
+| Portal branding shows "Microsoft Foundry" but guide says "Azure AI Foundry" | Rebranding occurred (Lesson 52) | Both names are correct; URL remains ai.azure.com |
+
+---
+
+## 9a. Code Changes Applied (Enterprise Validation)
+
+This deployment includes 7 code changes based on real-world deployment validation in enterprise environments:
+
+### Code Change 1: Made RBAC Assignment Conditional
+**Files:** `modules/ai-services.bicep`, `main.bicep`
+**Issue:** Deployer may lack User Access Administrator role (common in enterprises where roles are group-inherited — Lesson 4)
+**Fix:** Added `deployRbac` parameter (default `true`). When `false`, skips the `Cognitive Services OpenAI User` role assignment. Assign manually via portal after deployment.
+**Use:** Pass `-DeployRbac $false` when you lack UAA role
+
+### Code Change 2: Made Public IP Optional
+**Files:** `modules/gateway-vm.bicep`, `main.bicep`
+**Issue:** Enterprise subscriptions often have "Do Not Allow Public IPs" Azure Policy (Lesson 9)
+**Fix:** Added `deployPublicIp` parameter (default `true`). When `false`, skips Public IP and NIC public IP association. VM is still deployable but requires Bastion or VPN for RDP.
+**Use:** Pass `-DeployPublicIp $false` when policy blocks public IPs
+
+### Code Change 3: Added Standard Network Features to ANF Volume
+**File:** `modules/anf.bicep`
+**Issue:** ANF Object REST API requires Standard network features; default is Basic, causing silent bucket creation failures (Lesson 11)
+**Fix:** Added `networkFeatures: 'Standard'` to volume properties. Silent failure: bucket PUT returns 201 "Accepted" but GET returns `NoBucketFound`. Always check Activity Log after bucket creation.
+**Impact:** Essential for S3-compatible bucket access
+
+### Code Change 4: Fixed ANF Bucket Creation and Credential Generation
+**File:** `scripts/02-configure-anf-bucket.ps1`
+**Issues Fixed:**
+- **Lesson 15:** UID 0 (root) rejected by ONTAP — changed to configurable parameter (default 1000)
+- **Lesson 16:** `generateCredentials` requires `keyPairExpiryDays` parameter — fixed empty body to `{"keyPairExpiryDays": 365}`
+- **Lesson 13:** Certificate must be base64-encoded combined PEM — added encoding step
+- **Lesson 17:** Added Activity Log checking for debugging async bucket failures
+
+### Code Change 5: Made Computer Name Prefix-Aware
+**File:** `modules/gateway-vm.bicep`
+**Issue:** Windows computer name has 15-char NETBIOS limit; `az vm create` defaults to resource name (Lesson 18)
+**Fix:** Added `var computerName = take('${prefix}gw', 15)` — guarantees ≤15 chars
+**Impact:** Prevents `InvalidParameter` errors on VM creation
+
+### Code Change 6: Added Azure Bastion Deployment
+**Files:** `modules/networking.bicep`, `main.bicep`
+**Issue:** Without public IPs (due to policy), need alternative RDP access for gateway VM
+**Fix:** Added conditional Bastion Host deployment with `deployBastion` parameter (default `true`). Creates AzureBastionSubnet, PIP, and Bastion Basic SKU.
+**Note:** Bastion Developer tier supports only 1 session at a time (Lesson 29)
+
+### Code Change 7: Rewrote Gateway Installation Script
+**File:** `scripts/gateway/install-gateway.ps1`
+**Major Changes:**
+- Removed Service Principal-based registration (blocked in enterprise tenants — Lesson 4)
+- Uses `az vm run-command invoke` for reliable remote execution (Lesson 19)
+- Registration now interactive — requires RDP via Bastion and manual OPDG Configurator sign-in
+- Added certificate import via TcpClient/SslStream (Lesson 39) — imports self-signed cert from ANF endpoint
+- Added action parameters: `InstallOPDG`, `ImportCert`, or `All`
 
 ---
 

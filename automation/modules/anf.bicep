@@ -47,6 +47,9 @@ resource volume 'Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-0
     serviceLevel: 'Standard'
     subnetId: anfSubnetId
     usageThreshold: volumeQuotaGiB * 1073741824 // Convert GiB to bytes
+    // ADDED: Lab Lesson 11 — Object REST API requires Standard network features (Basic causes silent bucket creation failures)
+    // ORIGINAL: networkFeatures not specified (defaults to 'Basic')
+    networkFeatures: 'Standard'
     protocolTypes: [
       'NFSv3'
     ]
