@@ -312,7 +312,10 @@
             <li><a href="#section-4">Index OneLake Data Using Azure AI Search</a></li>
             <li><a href="#section-5">Connect OneLake to Azure AI Foundry</a></li>
             <li><a href="#section-6">Run and Validate a Grounded Agent</a></li>
-            <li><a href="#section-7">Troubleshooting</a></li>
+            <li><a href="#section-7">Deploy Live Market Data Tools (Pillar 2)</a></li>
+            <li><a href="#section-8">Enable Code Interpreter &amp; File Generation (Pillars 3 &amp; 4)</a></li>
+            <li><a href="#section-9">Validate the Complete 6-Pillar Agent</a></li>
+            <li><a href="#section-10">Troubleshooting</a></li>
         </ol>
     </div>
 
@@ -622,7 +625,128 @@ If data is in a CSV, calculate totals by summing rows.</code></pre>
 
     <!-- Section 7 -->
     <div class="lab-section" id="section-7">
-        <h2>7. Troubleshooting</h2>
+        <h2>7. Deploy Live Market Data Tools (Pillar 2)</h2>
+        <p><strong>Goal:</strong> Deploy Azure Functions providing real-time financial data and connect them to the agent via OpenAPI.</p>
+
+        <div class="info-box">
+            <strong>Why Tool Calling Matters:</strong> RAG answers questions from static documents. Tool calling lets the agent fetch <strong>live data</strong> &mdash; current stock prices, options chains, macroeconomic indicators &mdash; at query time.
+        </div>
+
+        <h3>7.1 Create and Deploy Azure Function App</h3>
+        <ol>
+            <li>In the Azure portal &rarr; <strong>Create a resource</strong> &rarr; <strong>Function App</strong>.
+                <ul>
+                    <li><strong>Runtime:</strong> Python 3.11</li>
+                    <li><strong>Plan type:</strong> Consumption (Serverless)</li>
+                    <li><strong>Region:</strong> Same as other resources</li>
+                </ul>
+            </li>
+            <li>Deploy the <code>capital_markets_azure_func/</code> folder from this repository:
+                <pre><code>cd capital_markets_azure_func
+func azure functionapp publish &lt;your-app-name&gt;</code></pre>
+            </li>
+            <li>Verify the deployment:
+                <pre><code>curl https://&lt;your-app-name&gt;.azurewebsites.net/health</code></pre>
+            </li>
+        </ol>
+
+        <p>The deployment includes <strong>8 endpoints</strong>: market_get_quote, market_get_options_chain, market_get_earnings, market_get_macro, market_compare_stocks, market_get_sector_performance, market_portfolio_snapshot, and market_get_news.</p>
+
+        <h3>7.2 Connect as Foundry Agent Action</h3>
+        <ol>
+            <li>In your Foundry Agent &rarr; <strong>Setup</strong> &rarr; <strong>Actions</strong> &rarr; <strong>+ Add</strong>.</li>
+            <li>Select <strong>OpenAPI 3.0 specified tool</strong>.</li>
+            <li>Upload <code>openapi_spec_azure_func.json</code> from the repository.</li>
+            <li>Set the <strong>Server URL</strong> to your Function App URL.</li>
+            <li>Click <strong>Add</strong>.</li>
+        </ol>
+
+        <h3>7.3 Test Live Data Integration</h3>
+        <ol>
+            <li>In the agent chat, ask: <em>"What is AAPL trading at right now?"</em></li>
+            <li>Verify the agent calls the <code>market_get_quote</code> tool and returns live price data.</li>
+            <li>Try a hybrid query: <em>"Compare AAPL's current price with our portfolio position from the documents."</em></li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 8 -->
+    <div class="lab-section" id="section-8">
+        <h2>8. Enable Code Interpreter &amp; File Generation (Pillars 3 &amp; 4)</h2>
+        <p><strong>Goal:</strong> Enable the agent to run Python code, perform calculations, and generate downloadable files.</p>
+
+        <h3>8.1 Enable Code Interpreter</h3>
+        <ol>
+            <li>In your agent's <strong>Setup</strong> panel &rarr; <strong>Actions</strong> &rarr; <strong>+ Add</strong>.</li>
+            <li>Select <strong>Code Interpreter</strong>.</li>
+        </ol>
+
+        <div class="info-box">
+            <strong>One-Click Enable:</strong> Code Interpreter runs in Azure's server-side sandbox with access to common Python libraries including openpyxl, reportlab, matplotlib, python-pptx, pandas, and numpy.
+        </div>
+
+        <h3>8.2 Update Agent Instructions</h3>
+        <p>Update the agent's system prompt with comprehensive file generation instructions. The updated instructions should include:</p>
+        <ul>
+            <li><strong>Excel generation</strong> using openpyxl with professional formatting, charts, and conditional colors</li>
+            <li><strong>PDF reports</strong> using reportlab with tables, headers, and embedded matplotlib charts</li>
+            <li><strong>PowerPoint presentations</strong> using python-pptx with consistent styling</li>
+            <li><strong>Compliance guardrails</strong> &mdash; disclaimers, no buy/sell recommendations, cite all sources</li>
+        </ul>
+
+        <div class="warn-box">
+            <strong>Full Instructions Template:</strong> See the <code>capital_markets_agent_architecture.md</code> file in this repository for the complete system prompt with all six pillars configured.
+        </div>
+
+        <h3>8.3 Test File Generation</h3>
+        <ol>
+            <li>Try: <em>"Create an Excel comparison report for NVDA vs AAPL with current market data and a bar chart."</em></li>
+            <li>Verify the agent calls live market tools, runs Code Interpreter, and produces a downloadable .xlsx file.</li>
+            <li>Try: <em>"Generate a PDF summary of our portfolio risk metrics."</em></li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <!-- Section 9 -->
+    <div class="lab-section" id="section-9">
+        <h2>9. Validate the Complete 6-Pillar Agent</h2>
+        <p><strong>Goal:</strong> Confirm all six agent pillars work individually and in combination.</p>
+
+        <div class="info-box">
+            <strong>The Six Pillars:</strong>
+            <ol style="margin-top: 0.5rem; margin-left: 1rem;">
+                <li>RAG Knowledge Base (search indexed documents)</li>
+                <li>Tool Calling / Live Data (8 real-time market tools)</li>
+                <li>Code Interpreter (Python calculations &amp; charts)</li>
+                <li>File Generation (Excel, PDF, PowerPoint exports)</li>
+                <li>Memory &amp; State (conversation thread history)</li>
+                <li>Guardrails &amp; Compliance (safety rules &amp; disclaimers)</li>
+            </ol>
+        </div>
+
+        <h3>9.1 Multi-Pillar Test Queries</h3>
+        <ol>
+            <li><strong>RAG + Tools + Code:</strong> <em>"What are our top holdings? Get current prices and calculate total portfolio value."</em></li>
+            <li><strong>Full Pipeline + File Gen:</strong> <em>"Create a PDF risk report comparing our portfolio to policy limits using current prices."</em></li>
+            <li><strong>Memory Test:</strong> After the above, ask: <em>"Based on what we just discussed, what's our biggest risk?"</em></li>
+            <li><strong>Guardrails Test:</strong> <em>"Should I buy NVDA right now?"</em> &mdash; agent should NOT recommend, only provide factual analysis with disclaimers.</li>
+        </ol>
+
+        <h3>9.2 Complete Architecture Verification</h3>
+        <p>The full zero-copy data flow now spans all six pillars:</p>
+        <pre><code>ANF (NFS/SMB) &rarr; Object REST API (S3) &rarr; OneLake Shortcut &rarr; AI Search Vector Index
+                                                                          &darr;
+User &harr; Foundry Agent &harr; RAG + Live Tools + Code Interpreter + File Gen + Memory + Guardrails</code></pre>
+        <p>All data remains on Azure NetApp Files. The agent combines static enterprise knowledge with real-time market data, computational analysis, and professional report generation &mdash; without copying a single byte.</p>
+    </div>
+
+    <hr>
+
+    <!-- Section 10 -->
+    <div class="lab-section" id="section-10">
+        <h2>10. Troubleshooting</h2>
         <ul>
             <li><strong>Gateway Error:</strong> Ensure the gateway VM has outbound 443 access to the ANF IP.</li>
             <li><strong>OneLake Shortcut Empty:</strong> Verify the bucket name in the shortcut settings matches the ANF bucket exactly.</li>

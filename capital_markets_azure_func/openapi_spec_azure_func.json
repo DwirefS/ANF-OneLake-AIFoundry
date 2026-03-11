@@ -1,0 +1,312 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Capital Markets Tool Calling API",
+    "description": "Real-time financial market data API for Azure AI Foundry Agent Actions. Provides stock quotes, options chains, earnings data, macroeconomic indicators, sector performance, portfolio analytics, and financial news via Yahoo Finance and FRED.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Capital Markets Data Service"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://<your-function-app-name>.azurewebsites.net",
+      "description": "Capital Markets Azure Functions endpoint"
+    }
+  ],
+  "paths": {
+    "/tools/market_get_quote": {
+      "post": {
+        "operationId": "market_get_quote",
+        "summary": "Get Real-Time Stock Quote",
+        "description": "Get comprehensive real-time quote for any ticker. Returns price, change, volume, market cap, P/E, 52-week range, dividend yield, EPS, beta, and more from Yahoo Finance.",
+        "tags": ["Stock Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker symbol (e.g., 'AAPL', 'MSFT', 'NVDA')",
+                    "example": "AAPL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock quote data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": { "type": "string" },
+                    "name": { "type": "string" },
+                    "price": { "type": "number" },
+                    "change": { "type": "number" },
+                    "change_percent": { "type": "number" },
+                    "market_cap_formatted": { "type": "string" },
+                    "trailing_pe": { "type": "number" },
+                    "forward_pe": { "type": "number" },
+                    "beta": { "type": "number" },
+                    "dividend_yield": { "type": "number" },
+                    "fifty_two_week_high": { "type": "number" },
+                    "fifty_two_week_low": { "type": "number" },
+                    "timestamp": { "type": "string" },
+                    "source": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/market_get_options_chain": {
+      "post": {
+        "operationId": "market_get_options_chain",
+        "summary": "Get Options Chain",
+        "description": "Fetch live options chain for a ticker — calls and/or puts near the money with implied volatility, volume, and open interest.",
+        "tags": ["Options"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Underlying stock ticker (e.g., 'SPY', 'AAPL', 'QQQ')"
+                  },
+                  "option_type": {
+                    "type": "string",
+                    "enum": ["call", "put", "both"],
+                    "default": "both",
+                    "description": "Filter by option type"
+                  },
+                  "expiry_index": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Index of expiry date (0=nearest, 1=next, etc.)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Options chain data with calls and/or puts",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_get_earnings": {
+      "post": {
+        "operationId": "market_get_earnings",
+        "summary": "Get Earnings History & Estimates",
+        "description": "Get quarterly earnings history: EPS estimates vs actuals, surprise %, beat rate, and next earnings date.",
+        "tags": ["Fundamentals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Company ticker (e.g., 'AAPL', 'MSFT', 'NVDA')"
+                  },
+                  "quarters": {
+                    "type": "integer",
+                    "default": 8,
+                    "description": "Number of recent quarters (max 20)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Earnings history with beat/miss analysis",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_get_macro": {
+      "post": {
+        "operationId": "market_get_macro",
+        "summary": "Get Macroeconomic Indicator",
+        "description": "Fetch macroeconomic time-series data from FRED. Available: fed_funds_rate, cpi_yoy, gdp_growth, unemployment, 10y_treasury, 2y_treasury, vix, usd_index, m2_money_supply, corp_bond_spread.",
+        "tags": ["Macro"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["indicator"],
+                "properties": {
+                  "indicator": {
+                    "type": "string",
+                    "enum": ["fed_funds_rate", "cpi_yoy", "gdp_growth", "unemployment", "10y_treasury", "2y_treasury", "vix", "usd_index", "m2_money_supply", "corp_bond_spread"],
+                    "description": "Economic indicator key"
+                  },
+                  "lookback_months": {
+                    "type": "integer",
+                    "default": 24,
+                    "description": "Months of history (max 120)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Macroeconomic time series with trend analysis",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_compare_stocks": {
+      "post": {
+        "operationId": "market_compare_stocks",
+        "summary": "Compare Multiple Stocks",
+        "description": "Compare 2-10 stocks side by side: price, P/E, market cap, beta, dividend yield, 52-week range.",
+        "tags": ["Stock Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tickers"],
+                "properties": {
+                  "tickers": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "minItems": 2,
+                    "maxItems": 10,
+                    "description": "List of ticker symbols to compare",
+                    "example": ["AAPL", "MSFT", "GOOGL"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Side-by-side stock comparison",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_get_sector_performance": {
+      "post": {
+        "operationId": "market_get_sector_performance",
+        "summary": "Get Sector ETF Performance",
+        "description": "Get real-time performance for all 11 GICS sector ETFs (XLK, XLF, XLV, etc.), ranked by day change.",
+        "tags": ["Sectors"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked sector performance with leader/laggard",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_portfolio_snapshot": {
+      "post": {
+        "operationId": "market_portfolio_snapshot",
+        "summary": "Portfolio Snapshot & Analytics",
+        "description": "Compute live portfolio snapshot with weighted P/E, beta, dividend yield, and position-level detail.",
+        "tags": ["Portfolio"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["holdings"],
+                "properties": {
+                  "holdings": {
+                    "type": "object",
+                    "additionalProperties": { "type": "number" },
+                    "description": "Ticker -> weight mapping. Weights should sum to ~1.0.",
+                    "example": { "AAPL": 0.30, "MSFT": 0.25, "GOOGL": 0.20, "JPM": 0.25 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Portfolio analytics with weighted metrics",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/tools/market_get_news": {
+      "post": {
+        "operationId": "market_get_news",
+        "summary": "Get Latest Financial News",
+        "description": "Fetch up to 10 recent news headlines for a ticker from Yahoo Finance.",
+        "tags": ["News"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker (e.g., 'AAPL', 'TSLA', 'SPY')"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of recent news articles",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    }
+  }
+}

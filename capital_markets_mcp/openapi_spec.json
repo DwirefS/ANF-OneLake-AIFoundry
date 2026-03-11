@@ -1,0 +1,841 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Capital Markets MCP API",
+    "description": "Real-time financial market data API providing stock quotes, options chains, earnings data, macroeconomic indicators, and portfolio analytics. Connects to Yahoo Finance and FRED data sources.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Capital Markets Data Service"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server (replace with your public endpoint in production)"
+    }
+  ],
+  "paths": {
+    "/tools/market_get_quote": {
+      "post": {
+        "operationId": "market_get_quote",
+        "summary": "Get Real-Time Stock Quote",
+        "description": "Get full real-time quote for any ticker. Returns price, change, volume, market cap, P/E, 52-week range, dividend yield, EPS, sector, and more from Yahoo Finance.",
+        "tags": ["Stock Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker symbol (e.g., 'AAPL', 'MSFT')",
+                    "example": "AAPL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful quote retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": {
+                      "type": "string",
+                      "description": "Stock ticker symbol"
+                    },
+                    "price": {
+                      "type": "number",
+                      "description": "Current stock price"
+                    },
+                    "change": {
+                      "type": "number",
+                      "description": "Absolute price change"
+                    },
+                    "change_percent": {
+                      "type": "number",
+                      "description": "Percentage change"
+                    },
+                    "volume": {
+                      "type": "integer",
+                      "description": "Trading volume"
+                    },
+                    "market_cap": {
+                      "type": "string",
+                      "description": "Market capitalization"
+                    },
+                    "pe_ratio": {
+                      "type": "number",
+                      "description": "Price-to-earnings ratio"
+                    },
+                    "eps": {
+                      "type": "number",
+                      "description": "Earnings per share"
+                    },
+                    "dividend_yield": {
+                      "type": "number",
+                      "description": "Dividend yield percentage"
+                    },
+                    "week_52_low": {
+                      "type": "number",
+                      "description": "52-week low price"
+                    },
+                    "week_52_high": {
+                      "type": "number",
+                      "description": "52-week high price"
+                    },
+                    "sector": {
+                      "type": "string",
+                      "description": "Industry sector"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Quote timestamp"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ticker provided"
+          },
+          "500": {
+            "description": "Server error retrieving quote"
+          }
+        }
+      }
+    },
+    "/tools/market_get_options_chain": {
+      "post": {
+        "operationId": "market_get_options_chain",
+        "summary": "Get Live Options Chain",
+        "description": "Get live options chain near the money for any ticker. Returns calls and puts with strike, bid, ask, implied volatility, delta, gamma, theta, vega, and open interest.",
+        "tags": ["Options Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker symbol (e.g., 'AAPL', 'MSFT')",
+                    "example": "AAPL"
+                  },
+                  "expiry_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Expiration date in YYYY-MM-DD format (optional, defaults to nearest expiration)",
+                    "example": "2026-04-17"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful options chain retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": {
+                      "type": "string"
+                    },
+                    "expiry_date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "underlying_price": {
+                      "type": "number"
+                    },
+                    "calls": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "strike": {
+                            "type": "number"
+                          },
+                          "bid": {
+                            "type": "number"
+                          },
+                          "ask": {
+                            "type": "number"
+                          },
+                          "implied_volatility": {
+                            "type": "number"
+                          },
+                          "delta": {
+                            "type": "number"
+                          },
+                          "gamma": {
+                            "type": "number"
+                          },
+                          "theta": {
+                            "type": "number"
+                          },
+                          "vega": {
+                            "type": "number"
+                          },
+                          "open_interest": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    },
+                    "puts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "strike": {
+                            "type": "number"
+                          },
+                          "bid": {
+                            "type": "number"
+                          },
+                          "ask": {
+                            "type": "number"
+                          },
+                          "implied_volatility": {
+                            "type": "number"
+                          },
+                          "delta": {
+                            "type": "number"
+                          },
+                          "gamma": {
+                            "type": "number"
+                          },
+                          "theta": {
+                            "type": "number"
+                          },
+                          "vega": {
+                            "type": "number"
+                          },
+                          "open_interest": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ticker or expiry date"
+          },
+          "500": {
+            "description": "Server error retrieving options chain"
+          }
+        }
+      }
+    },
+    "/tools/market_get_earnings": {
+      "post": {
+        "operationId": "market_get_earnings",
+        "summary": "Get Quarterly Earnings History",
+        "description": "Get quarterly earnings history for any ticker. Returns EPS estimate vs actual, beat/miss streak, surprise percentage, and next earnings date.",
+        "tags": ["Earnings Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker symbol (e.g., 'AAPL', 'MSFT')",
+                    "example": "AAPL"
+                  },
+                  "quarters": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 4,
+                    "description": "Number of quarters to retrieve (1-20, default 4)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful earnings history retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": {
+                      "type": "string"
+                    },
+                    "earnings_history": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "quarter": {
+                            "type": "string",
+                            "description": "Quarter identifier (e.g., 'Q1 2026')"
+                          },
+                          "earnings_date": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "eps_estimate": {
+                            "type": "number"
+                          },
+                          "eps_actual": {
+                            "type": "number"
+                          },
+                          "surprise_percent": {
+                            "type": "number"
+                          },
+                          "beat_miss": {
+                            "type": "string",
+                            "enum": ["beat", "miss", "in line"]
+                          }
+                        }
+                      }
+                    },
+                    "beat_miss_streak": {
+                      "type": "integer",
+                      "description": "Consecutive beats (positive) or misses (negative)"
+                    },
+                    "next_earnings_date": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ticker provided"
+          },
+          "500": {
+            "description": "Server error retrieving earnings data"
+          }
+        }
+      }
+    },
+    "/tools/market_get_macro": {
+      "post": {
+        "operationId": "market_get_macro",
+        "summary": "Get Macroeconomic Indicators",
+        "description": "Get latest macroeconomic indicators from FRED (Federal Reserve). Returns latest value, prior value, and change for each requested indicator.",
+        "tags": ["Macro Data"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "indicators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "fed_funds_rate",
+                        "cpi_yoy",
+                        "gdp_growth",
+                        "unemployment",
+                        "10y_treasury",
+                        "2y_treasury",
+                        "vix",
+                        "usd_index",
+                        "m2_money_supply",
+                        "corp_bond_spread"
+                      ]
+                    },
+                    "description": "Array of macro indicators to retrieve (if empty, returns all available)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful macro indicators retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "indicators": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "indicator": {
+                            "type": "string"
+                          },
+                          "latest_value": {
+                            "type": "number"
+                          },
+                          "prior_value": {
+                            "type": "number"
+                          },
+                          "change": {
+                            "type": "number"
+                          },
+                          "change_percent": {
+                            "type": "number"
+                          },
+                          "unit": {
+                            "type": "string",
+                            "description": "Unit of measurement (%, basis points, index, etc.)"
+                          },
+                          "last_updated": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid indicator requested"
+          },
+          "500": {
+            "description": "Server error retrieving macro indicators"
+          }
+        }
+      }
+    },
+    "/tools/market_compare_stocks": {
+      "post": {
+        "operationId": "market_compare_stocks",
+        "summary": "Compare Multiple Stocks",
+        "description": "Side-by-side comparison of 2-10 stocks. Returns price, change, market cap, P/E, EPS, dividend yield, beta, 52-week range for each.",
+        "tags": ["Stock Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tickers"],
+                "properties": {
+                  "tickers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 10,
+                    "description": "Array of 2-10 stock ticker symbols",
+                    "example": ["AAPL", "MSFT", "GOOGL"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful stock comparison",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "comparison": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ticker": {
+                            "type": "string"
+                          },
+                          "price": {
+                            "type": "number"
+                          },
+                          "change": {
+                            "type": "number"
+                          },
+                          "change_percent": {
+                            "type": "number"
+                          },
+                          "market_cap": {
+                            "type": "string"
+                          },
+                          "pe_ratio": {
+                            "type": "number"
+                          },
+                          "eps": {
+                            "type": "number"
+                          },
+                          "dividend_yield": {
+                            "type": "number"
+                          },
+                          "beta": {
+                            "type": "number"
+                          },
+                          "week_52_low": {
+                            "type": "number"
+                          },
+                          "week_52_high": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ticker count or format"
+          },
+          "500": {
+            "description": "Server error comparing stocks"
+          }
+        }
+      }
+    },
+    "/tools/market_get_sector_performance": {
+      "post": {
+        "operationId": "market_get_sector_performance",
+        "summary": "Get Sector Performance",
+        "description": "Get performance of all 11 GICS sectors via ETF proxies. Returns 1-day, 5-day, 1-month, 3-month, YTD, and 1-year returns ranked by daily performance.",
+        "tags": ["Sector Data"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful sector performance retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sectors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sector": {
+                            "type": "string",
+                            "description": "GICS sector name"
+                          },
+                          "etf_ticker": {
+                            "type": "string",
+                            "description": "Representative ETF ticker"
+                          },
+                          "day_1_return": {
+                            "type": "number"
+                          },
+                          "day_5_return": {
+                            "type": "number"
+                          },
+                          "month_1_return": {
+                            "type": "number"
+                          },
+                          "month_3_return": {
+                            "type": "number"
+                          },
+                          "ytd_return": {
+                            "type": "number"
+                          },
+                          "year_1_return": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error retrieving sector performance"
+          }
+        }
+      }
+    },
+    "/tools/market_portfolio_snapshot": {
+      "post": {
+        "operationId": "market_portfolio_snapshot",
+        "summary": "Get Live Portfolio Analytics",
+        "description": "Get live portfolio analytics. Returns per-holding value, weight, daily PnL, and aggregate portfolio metrics including total value, daily change, weighted P/E, and beta.",
+        "tags": ["Portfolio Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["holdings"],
+                "properties": {
+                  "holdings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["ticker", "shares"],
+                      "properties": {
+                        "ticker": {
+                          "type": "string",
+                          "description": "Stock ticker symbol"
+                        },
+                        "shares": {
+                          "type": "number",
+                          "description": "Number of shares held"
+                        }
+                      }
+                    },
+                    "description": "Array of holdings with ticker and share count"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful portfolio snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "portfolio": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "ticker": {
+                            "type": "string"
+                          },
+                          "shares": {
+                            "type": "number"
+                          },
+                          "current_price": {
+                            "type": "number"
+                          },
+                          "current_value": {
+                            "type": "number"
+                          },
+                          "portfolio_weight": {
+                            "type": "number"
+                          },
+                          "daily_change": {
+                            "type": "number"
+                          },
+                          "daily_pnl": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "aggregate": {
+                      "type": "object",
+                      "properties": {
+                        "total_value": {
+                          "type": "number"
+                        },
+                        "daily_change": {
+                          "type": "number"
+                        },
+                        "daily_change_percent": {
+                          "type": "number"
+                        },
+                        "weighted_pe": {
+                          "type": "number"
+                        },
+                        "weighted_beta": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid holdings format"
+          },
+          "500": {
+            "description": "Server error calculating portfolio metrics"
+          }
+        }
+      }
+    },
+    "/tools/market_get_news": {
+      "post": {
+        "operationId": "market_get_news",
+        "summary": "Get Latest News Headlines",
+        "description": "Get latest news headlines for any ticker from Yahoo Finance. Returns title, publisher, link, and publish date.",
+        "tags": ["News Data"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ticker"],
+                "properties": {
+                  "ticker": {
+                    "type": "string",
+                    "description": "Stock ticker symbol (e.g., 'AAPL', 'MSFT')",
+                    "example": "AAPL"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 20,
+                    "default": 5,
+                    "description": "Number of news articles to retrieve (1-20, default 5)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful news retrieval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ticker": {
+                      "type": "string"
+                    },
+                    "news": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "publisher": {
+                            "type": "string"
+                          },
+                          "link": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "publish_date": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ticker provided"
+          },
+          "500": {
+            "description": "Server error retrieving news"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Stock Data",
+      "description": "Real-time stock price and fundamental data"
+    },
+    {
+      "name": "Options Data",
+      "description": "Options chain and Greeks"
+    },
+    {
+      "name": "Earnings Data",
+      "description": "Earnings history and estimates"
+    },
+    {
+      "name": "Macro Data",
+      "description": "Macroeconomic indicators"
+    },
+    {
+      "name": "Sector Data",
+      "description": "Sector performance metrics"
+    },
+    {
+      "name": "Portfolio Data",
+      "description": "Portfolio analytics and holdings"
+    },
+    {
+      "name": "News Data",
+      "description": "News and sentiment data"
+    }
+  ]
+}

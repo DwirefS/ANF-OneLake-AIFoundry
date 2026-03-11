@@ -3,14 +3,23 @@
 # These files are kept on disk but NOT committed
 # ===========================================
 
-# --- Secrets & Certificates ---
+# --- keptLocal folder (ALL contents — certs, keys, credentials, lab lessons, admin emails) ---
+keptLocal/
+
+# --- Secrets & Certificates (anywhere in repo) ---
 cert.pem
 *.pem
 *.pfx
 *.key
+*.crt
+*.p12
+private.key
+rsa_private.key
+s3_credentials.txt
 
 # --- Lab Lessons (contain real access keys, IPs, credentials from validation runs) ---
 HOL_LabLessons.md
+HOL_Lessons_Learned.md
 LabLessons.md
 
 # --- Admin requests & emails (contain subscription IDs, tenant IDs, SP instructions) ---
@@ -31,9 +40,19 @@ misc/final-medium-draft.md
 # --- OS artifacts ---
 .DS_Store
 **/.DS_Store
+.vs/
+Thumbs.db
 
 # --- Environment / credentials ---
 .env
 *.env
 .env.*
 credentials.json
+**/credentials*
+**/secrets*
+
+# --- Build / temp artifacts ---
+__pycache__/
+*.pyc
+.funcignore
+local.settings.json

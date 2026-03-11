@@ -26,7 +26,7 @@ graph LR
 ## Included Artifacts
 
 ### 1. The Lab Guide (`lab_guide.md`)
-*   **Path**: [lab_guide.md](file:///Users/dwirefs/.gemini/antigravity/brain/a59cccc5-2ee2-43ef-94f7-912d14d9b49f/lab_guide.md)
+*   **Path**: [lab_guide.md](lab_guide.md)
 *   **Status**: **End-to-End Comprehensive**.
 *   **Lab Overview**:
 #### 1.   Validate Azure Subscription Requirements
@@ -256,18 +256,101 @@ This is not a demo on sample data in a hidden store.
 
 This is AI operating directly on governed enterprise data—without copying it.
 
+#### 7. Deploy Live Market Data Tools (Pillar 2: Tool Calling)
+##### 7.1 Deploy Azure Functions
+**What we're doing**
+
+We're deploying 8 Azure Function endpoints that provide real-time financial data — stock quotes, options chains, earnings, macroeconomic indicators, sector performance, portfolio snapshots, and news.
+
+**Why this matters**
+
+The RAG knowledge base answers questions about static documents. But capital markets professionals need live data. Tool calling bridges this gap — the agent can now fetch real-time market data on demand, at query time.
+
+**What to emphasize**
+
+* RAG alone gives you historical context. Tools give you the present. Together, they give the agent situational awareness.
+* The Azure Functions use Yahoo Finance and FRED APIs — free, reliable data sources.
+* The OpenAPI spec makes these tools discoverable by the agent automatically.
+
+##### 7.2 Connect via OpenAPI
+**What we're doing**
+
+We're uploading an OpenAPI 3.0 specification that describes all 8 endpoints, so the Foundry agent can discover and call them autonomously.
+
+**Why this matters**
+
+This is the same pattern used in production: define tools as OpenAPI specs, connect them to the agent, and let the model decide when to call each one. The agent learns the tool interface from the spec — no hardcoding.
+
+**Key point**
+
+The real power shows when the agent combines RAG + Tools in a single response. Ask "How does our AAPL position compare to current market conditions?" and watch the agent pull portfolio data from documents AND live prices from the API in the same turn.
+
+#### 8. Enable Code Interpreter and File Generation (Pillars 3 & 4)
+##### 8.1 Enable Code Interpreter
+**What we're doing**
+
+We're enabling Code Interpreter — a single checkbox that gives the agent the ability to write and execute Python code.
+
+**Why this matters**
+
+LLMs can reason about numbers, but they can't reliably calculate. Code Interpreter fixes this. The agent can now compute Sharpe ratios, run Monte Carlo simulations, generate matplotlib charts, and build complex analyses.
+
+**What to emphasize**
+
+* This is a one-click enable — it's already built into Azure AI Foundry.
+* The agent decides when to write code. You don't have to prompt it explicitly.
+* Combined with live market data, the agent can fetch prices, run calculations, and present results — all in one turn.
+
+##### 8.2 Update Agent Instructions for File Generation
+**What we're doing**
+
+We're updating the agent's system prompt with detailed file generation instructions, so it knows how to create professional Excel spreadsheets, PDF reports, and PowerPoint presentations.
+
+**Why this matters**
+
+This transforms the agent from a chatbot into a productivity tool. Financial analysts don't just want answers in chat — they want downloadable reports they can email, present, or archive. File generation is the bridge between AI chat and real-world workflow.
+
+**What to emphasize**
+
+* The agent uses openpyxl for Excel (with formatting, charts, conditional colors), reportlab for PDFs, and python-pptx for presentations.
+* Files are generated server-side in Azure's sandbox environment.
+* The combination of RAG data + live market data + professional file output is the "wow" moment of the demo.
+
+#### 9. Validate the Complete 6-Pillar Agent
+**What we're doing**
+
+We're running multi-pillar test queries that exercise all six capabilities simultaneously, confirming the agent operates as a complete Capital Markets assistant.
+
+**Why this matters**
+
+This is the payoff of the entire workshop. The agent isn't just answering questions from documents anymore. It's:
+* Retrieving portfolio data from enterprise files (Pillar 1 — RAG)
+* Fetching live market prices (Pillar 2 — Tools)
+* Running financial calculations (Pillar 3 — Code Interpreter)
+* Generating downloadable reports (Pillar 4 — File Generation)
+* Maintaining conversational context (Pillar 5 — Memory)
+* Enforcing compliance rules (Pillar 6 — Guardrails)
+
+**What to emphasize**
+
+* This is not a toy demo. This is the same architectural pattern used by production financial AI systems at major banks.
+* The data never left Azure NetApp Files. It remained the single source of truth the entire time.
+* From here, the only difference between this and a Bloomberg Terminal AI is scale (number of data sources) and regulatory certification, not architecture.
+
 #### Closing Message for the Workshop
-What we’ve shown is a repeatable pattern:
+What we’ve shown is a repeatable, production-grade pattern:
 
-*   Azure NetApp Files as the system of record
-*   OneLake as a virtualization layer
-*   Azure AI Search as retrieval
-*   Azure AI Foundry as the AI execution layer
+*   **Azure NetApp Files** as the system of record
+*   **OneLake** as a virtualization layer
+*   **Azure AI Search** as retrieval
+*   **Azure Functions** as the real-time data layer
+*   **Code Interpreter** as the computation engine
+*   **Azure AI Foundry** as the AI execution layer — with RAG, tool calling, file generation, memory, and guardrails
 
-This pattern scales from workshops to real enterprise deployments, while minimizing risk, duplication, and operational overhead.
+This pattern scales from workshops to real enterprise deployments. All six pillars are operational, and the data never left its authoritative location.
 
 ### 2. Dummy Data Suite (`test_data/`)
-*   **Path**: [test_data](file:///Users/dwirefs/.gemini/antigravity/brain/a59cccc5-2ee2-43ef-94f7-912d14d9b49f/test_data)
+*   **Path**: [test_data](test_data/)
 *   **Status**: **Ready**.
 *   **Contents**:
     *   `invoices/`: 10 HTML invoices representing unstructured vendor bills.

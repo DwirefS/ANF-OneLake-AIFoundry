@@ -730,6 +730,9 @@
         .lab-card:nth-child(4)::before { background: var(--ai-teal); }
         .lab-card:nth-child(5)::before { background: #8b5cf6; }
         .lab-card:nth-child(6)::before { background: #f59e0b; }
+        .lab-card:nth-child(7)::before { background: #ec4899; }
+        .lab-card:nth-child(8)::before { background: #14b8a6; }
+        .lab-card:nth-child(9)::before { background: #f97316; }
 
         .lab-card:hover {
             background: var(--bg-card-hover);
@@ -754,6 +757,9 @@
         .lab-card:nth-child(4) .lab-number { background: rgba(0, 133, 117, 0.15); color: #5eead4; }
         .lab-card:nth-child(5) .lab-number { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
         .lab-card:nth-child(6) .lab-number { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .lab-card:nth-child(7) .lab-number { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+        .lab-card:nth-child(8) .lab-number { background: rgba(20, 184, 166, 0.15); color: #2dd4bf; }
+        .lab-card:nth-child(9) .lab-number { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
 
         .lab-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; }
         .lab-card p { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.7; }
@@ -976,7 +982,7 @@
             <span class="gradient-text">Grounded on Your Data</span>
         </h1>
         <p class="hero-subtitle">
-            A production-ready foundation for building Azure AI Foundry agents grounded on enterprise data in Azure NetApp Files &mdash; virtualized through Microsoft Fabric OneLake &mdash; without migrating, copying, or re-platforming a single byte.
+            A production-ready 6-pillar AI agent &mdash; RAG, live market data, code execution, file generation, memory, and compliance &mdash; grounded on enterprise data in Azure NetApp Files, virtualized through Microsoft Fabric OneLake, without copying a single byte.
         </p>
         <p class="hero-value-prop">
             This is not just a proof-of-concept. It is the <strong style="color: var(--text-primary);">base AI agent infrastructure</strong> &mdash; networking, storage, data integration, intelligent indexing, model deployments, and agent configuration &mdash; all wired together and ready to go. From here, you add your own skills, customize the workflow, and connect your own data.
@@ -1109,7 +1115,7 @@
                 <div class="path-time">~2-3 hours &middot; Portal-based &middot; Step-by-step</div>
                 <p>Walk through every Azure Portal screen, understand each service configuration, and build the full pipeline manually. Ideal for workshops, training sessions, and deep understanding.</p>
                 <ul class="path-features">
-                    <li>Six structured modules with checkpoints</li>
+                    <li>Nine structured modules with checkpoints</li>
                     <li>Presenter talk track for live demos</li>
                     <li>Technical deep-dive whitepaper</li>
                     <li>Every step explained with context</li>
@@ -1245,7 +1251,7 @@
             </div>
             <div class="extend-card">
                 <h3>Customize the Agent</h3>
-                <p>Change the system prompt, add new tools (Code Interpreter, Azure Functions, Bing Search), adjust retrieval parameters, or create multiple specialized agents from the same index.</p>
+                <p>All six pillars are pre-configured: RAG, live market tools, Code Interpreter, file generation, memory, and guardrails. Customize the system prompt, add new tools, or create specialized agents from the same foundation.</p>
             </div>
             <div class="extend-card">
                 <h3>Multi-Source RAG</h3>
@@ -1269,7 +1275,7 @@
         <span class="section-label">Hands-On Lab</span>
         <h2 class="section-title">Workshop Lab Guide</h2>
         <p class="section-desc">
-            Six structured modules take you from subscription validation to a fully grounded AI agent answering questions on enterprise financial data.
+            Nine structured modules take you from subscription validation to a complete 6-pillar AI agent with RAG, live market data, code execution, file generation, and compliance guardrails.
         </p>
 
         <div class="lab-steps">
@@ -1330,6 +1336,36 @@
                     <span class="service-tag">Agents</span>
                     <span class="service-tag">RAG</span>
                     <span class="service-tag">Citations</span>
+                </div>
+            </div>
+            <div class="lab-card">
+                <div class="lab-number">7</div>
+                <h3>Deploy Live Market Data Tools</h3>
+                <p>Deploy Azure Functions for real-time financial data and connect them as OpenAPI actions. The agent can now fetch live prices alongside RAG knowledge.</p>
+                <div class="services">
+                    <span class="service-tag">Azure Functions</span>
+                    <span class="service-tag">OpenAPI</span>
+                    <span class="service-tag">Yahoo Finance</span>
+                </div>
+            </div>
+            <div class="lab-card">
+                <div class="lab-number">8</div>
+                <h3>Code Interpreter &amp; File Generation</h3>
+                <p>Enable Code Interpreter for calculations and charts. Update agent instructions for professional Excel, PDF, and PowerPoint report generation.</p>
+                <div class="services">
+                    <span class="service-tag">Code Interpreter</span>
+                    <span class="service-tag">openpyxl</span>
+                    <span class="service-tag">reportlab</span>
+                </div>
+            </div>
+            <div class="lab-card">
+                <div class="lab-number">9</div>
+                <h3>Validate 6-Pillar Agent</h3>
+                <p>Run multi-pillar test queries exercising all capabilities: RAG + live data + computation + file generation + memory + guardrails.</p>
+                <div class="services">
+                    <span class="service-tag">Integration</span>
+                    <span class="service-tag">6 Pillars</span>
+                    <span class="service-tag">End-to-End</span>
                 </div>
             </div>
         </div>

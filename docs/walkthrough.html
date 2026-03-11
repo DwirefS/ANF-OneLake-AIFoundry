@@ -305,18 +305,100 @@
 
     <hr>
 
+    <!-- Section 7 -->
+    <div class="walk-section">
+        <h2>7. Deploy Live Market Data Tools (Pillar 2)</h2>
+
+        <h3>What we're doing</h3>
+        <p>We're deploying 8 Azure Function endpoints that provide real-time financial data &mdash; stock quotes, options chains, earnings, macroeconomic indicators, sector performance, and portfolio snapshots &mdash; and connecting them to the agent via OpenAPI.</p>
+
+        <h3>Why this matters</h3>
+        <p>The RAG knowledge base answers questions about static documents. But capital markets professionals need <strong>live data</strong>. Tool calling bridges this gap &mdash; the agent can fetch real-time prices, macro data, and news on demand.</p>
+
+        <div class="emphasis-box">
+            <strong>What to emphasize:</strong>
+            <ul>
+                <li>RAG alone gives you historical context. Tools give you the present. Together, they give the agent <strong>situational awareness</strong>.</li>
+                <li>The OpenAPI spec makes tools discoverable &mdash; the agent learns the interface automatically.</li>
+                <li>Ask "How does our AAPL position compare to current market conditions?" and watch RAG + Tools work together in a single response.</li>
+            </ul>
+        </div>
+
+        <div class="key-moment">
+            <h4>The Hybrid Query Moment</h4>
+            <p>When the agent combines portfolio data from RAG with live market prices from the tools in a single answer &mdash; that's the moment customers understand why this architecture matters. Static docs + live data = informed decisions.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Section 8 -->
+    <div class="walk-section">
+        <h2>8. Enable Code Interpreter &amp; File Generation (Pillars 3 &amp; 4)</h2>
+
+        <h3>What we're doing</h3>
+        <p>We're enabling Code Interpreter (one click) and updating the agent instructions with detailed file generation capabilities for Excel, PDF, and PowerPoint output.</p>
+
+        <h3>Why this matters</h3>
+        <p>LLMs can reason about numbers but can't reliably calculate. Code Interpreter fixes this. More importantly, file generation transforms the agent from a chatbot into a <strong>productivity tool</strong>. Financial analysts don't just want chat answers &mdash; they want downloadable reports they can email, present, or archive.</p>
+
+        <div class="emphasis-box">
+            <strong>What to emphasize:</strong>
+            <ul>
+                <li>Code Interpreter is a one-click enable &mdash; already built into Azure AI Foundry.</li>
+                <li>The agent uses openpyxl for Excel, reportlab for PDFs, python-pptx for presentations.</li>
+                <li>The combination of RAG data + live market data + professional file output is the "wow" moment of the demo.</li>
+            </ul>
+        </div>
+
+        <div class="key-moment">
+            <h4>The File Generation Wow Moment</h4>
+            <p>Ask the agent to "Create an Excel comparison report for NVDA vs AAPL with current market data and charts." Watch it call live APIs, run calculations, generate a professionally formatted spreadsheet with charts and conditional formatting, and provide it as a downloadable file &mdash; all in one turn. This is where customers lean forward.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Section 9 -->
+    <div class="walk-section">
+        <h2>9. Validate the Complete 6-Pillar Agent</h2>
+
+        <h3>What we're doing</h3>
+        <p>We're running multi-pillar test queries that exercise all six capabilities simultaneously, confirming the agent operates as a complete Capital Markets assistant.</p>
+
+        <h3>Why this matters</h3>
+        <p>This is the payoff of the entire workshop. The agent is now:</p>
+        <ul>
+            <li>Retrieving portfolio data from enterprise files <strong>(Pillar 1 &mdash; RAG)</strong></li>
+            <li>Fetching live market prices <strong>(Pillar 2 &mdash; Tools)</strong></li>
+            <li>Running financial calculations <strong>(Pillar 3 &mdash; Code Interpreter)</strong></li>
+            <li>Generating downloadable reports <strong>(Pillar 4 &mdash; File Generation)</strong></li>
+            <li>Maintaining conversational context <strong>(Pillar 5 &mdash; Memory)</strong></li>
+            <li>Enforcing compliance rules <strong>(Pillar 6 &mdash; Guardrails)</strong></li>
+        </ul>
+
+        <div class="key-moment">
+            <h4>The Production Architecture Moment</h4>
+            <p>This is <strong>not</strong> a toy demo. This is the same architectural pattern used by production financial AI systems at major banks. The difference between this and a Bloomberg Terminal AI is scale (number of data sources) and regulatory certification, not architecture. And the data <strong>never left Azure NetApp Files</strong>.</p>
+        </div>
+    </div>
+
+    <hr>
+
     <!-- Closing -->
     <div class="walk-section">
         <h2>Closing Message</h2>
         <div class="closing-box">
-            <h3>What we've demonstrated is a repeatable pattern:</h3>
+            <h3>What we've demonstrated is a complete, production-grade pattern:</h3>
             <ul>
                 <li><strong>Azure NetApp Files</strong> as the system of record</li>
                 <li><strong>OneLake</strong> as a virtualization layer</li>
                 <li><strong>Azure AI Search</strong> as the retrieval substrate</li>
-                <li><strong>Azure AI Foundry</strong> as the AI execution layer</li>
+                <li><strong>Azure Functions</strong> as the real-time data layer</li>
+                <li><strong>Code Interpreter</strong> as the computation engine</li>
+                <li><strong>Azure AI Foundry</strong> as the AI execution layer &mdash; with RAG, tool calling, file generation, memory, and guardrails</li>
             </ul>
-            <p style="margin-top: 1rem;">This pattern scales from workshops to real enterprise deployments, while minimizing risk, duplication, and operational overhead.</p>
+            <p style="margin-top: 1rem;">All six pillars are operational. The data never left its authoritative location. This pattern scales from workshops to real enterprise deployments.</p>
         </div>
     </div>
 
@@ -325,7 +407,7 @@
         <ol style="color: var(--text-secondary); margin-left: 1.25rem;">
             <li><strong>Distribute:</strong> Send the lab guide and test data to your workshop participants.</li>
             <li><strong>Pre-Flight:</strong> Ensure subscriptions are whitelisted for the Azure NetApp Files Object REST API Access preview.</li>
-            <li><strong>Run:</strong> Follow the guide step-by-step. Section 6 provides the "wow" moment for the demo.</li>
+            <li><strong>Run:</strong> Follow the guide step-by-step. Sections 7&ndash;9 showcase the advanced capabilities. Section 9 provides the ultimate "wow" moment.</li>
         </ol>
     </div>
 
