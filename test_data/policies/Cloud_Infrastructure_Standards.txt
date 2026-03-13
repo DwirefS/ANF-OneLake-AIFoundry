@@ -1,0 +1,60 @@
+CONTOSO FINANCIAL SERVICES — CLOUD INFRASTRUCTURE STANDARDS
+Document ID: POL-INFRA-2025-002
+Effective Date: January 15, 2025
+Last Revised: March 1, 2025
+Approved By: James Park, VP of Engineering
+
+1. PURPOSE
+This document defines the standards and best practices for cloud infrastructure deployment and management at Contoso Financial Services.
+
+2. APPROVED CLOUD SERVICES
+2.1 Primary Cloud Provider: Microsoft Azure
+2.2 Approved Services:
+    - Compute: Azure Virtual Machines, Azure Kubernetes Service (AKS), Azure Container Instances
+    - Storage: Azure NetApp Files (primary), Azure Blob Storage (secondary), Azure Data Lake Storage Gen2
+    - Networking: Azure Virtual Network, Azure Bastion, Azure Application Gateway, Azure Front Door
+    - AI/ML: Azure AI Foundry, Azure AI Search, Azure OpenAI Service, Azure Machine Learning
+    - Analytics: Microsoft Fabric, Azure Synapse Analytics
+    - Security: Azure Key Vault, Microsoft Defender for Cloud, Azure Sentinel
+    - Gateway: On-Premises Data Gateway (OPDG) for hybrid connectivity
+
+3. AZURE NETAPP FILES STANDARDS
+3.1 Service Level: Flexible tier for development, Premium for production workloads
+3.2 Minimum capacity pool: 1 TiB (Flexible) or 2 TiB (Standard/Premium)
+3.3 Protocol support: NFSv3 for Linux workloads, SMB for Windows workloads
+3.4 Object REST API: Enabled for AI/analytics consumption via S3-compatible endpoints
+3.5 Cool Access: Enabled for pools with data older than 31 days
+3.6 Snapshot policy: Daily snapshots retained for 7 days, weekly for 4 weeks
+3.7 Cross-region replication: Required for production volumes (East US 2 → West US 2)
+3.8 Encryption: Platform-managed keys (PMK) minimum, customer-managed keys (CMK) for RESTRICTED data
+
+4. NETWORKING STANDARDS
+4.1 VNet design: Hub-spoke topology with Azure Firewall in the hub
+4.2 Address space: /16 for production VNets, /24 for development VNets
+4.3 Subnet delegation: ANF volumes require a dedicated delegated subnet
+4.4 DNS: Azure Private DNS Zones for all PaaS services
+4.5 Bastion: Developer tier for dev/test, Standard tier for production environments
+4.6 No public IPs on virtual machines — all access through Bastion or VPN
+
+5. AI AND ANALYTICS STANDARDS
+5.1 Microsoft Fabric: Fabric capacity (F4 or higher) required for production OneLake shortcuts
+5.2 OneLake shortcuts to ANF: Use On-Premises Data Gateway (OPDG) with S3-compatible connector
+5.3 Azure AI Search: Premium tier for production, Basic tier for development
+5.4 Indexing: Use integrated vectorization with Azure OpenAI text-embedding-ada-002
+5.5 AI Foundry: All projects must be associated with an AI Hub in the same region
+5.6 Model deployment: GPT-4o for production agents, GPT-4o-mini for development/testing
+
+6. COST MANAGEMENT
+6.1 All resources must have cost center and environment tags
+6.2 Budget alerts at 75%, 90%, and 100% of monthly allocation
+6.3 Development environments auto-shutdown after 8 PM local time
+6.4 Quarterly cost optimization reviews by the Cloud Center of Excellence (CCoE)
+6.5 Reserved instances for predictable workloads (1-year minimum commitment)
+
+7. DEPLOYMENT STANDARDS
+7.1 Infrastructure as Code: Bicep templates for all deployments (ARM JSON accepted for legacy)
+7.2 CI/CD: Azure DevOps Pipelines or GitHub Actions
+7.3 Environments: dev → staging → production with approval gates
+7.4 Region: East US 2 (primary), West US 2 (DR)
+
+For questions, contact: cloud-engineering@contoso-financial.com

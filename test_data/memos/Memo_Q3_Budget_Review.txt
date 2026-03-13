@@ -1,0 +1,50 @@
+INTERNAL MEMO — CONFIDENTIAL
+From: Sarah Chen, CFO
+To: Executive Leadership Team
+Date: October 5, 2025
+Subject: Q3 2025 Budget Review and Q4 Forecast
+
+Team,
+
+I'm writing to share the Q3 2025 budget review results and outline our projections for Q4.
+
+Q3 FINANCIAL HIGHLIGHTS:
+- Total revenue: $5.32 million (8% above forecast)
+- Total expenses: $3.41 million (2% under budget)
+- Operating margin: 35.9% (target was 33%)
+- Cash position: $12.8 million
+
+REVENUE DRIVERS:
+Our strongest growth came from three areas:
+1. Azure NetApp Files deployments increased 22% QoQ as enterprise customers expanded storage
+2. RAG (Retrieval-Augmented Generation) solutions revenue grew 45% QoQ driven by the new Azure AI Foundry integration
+3. Object Storage API adoption surged — 15 new customers adopted the S3-compatible endpoint for analytics workloads
+
+EXPENSE HIGHLIGHTS:
+- Cloud infrastructure (Azure): $87,500/month average — up 15% due to AI workload expansion
+- Personnel: $142,000/month — added 2 ML engineers in August
+- Office (WeWork): $7,500/month — stable
+- Software licenses: $8,200/month — Salesforce renewal at existing rate
+
+AREAS OF CONCERN:
+1. Azure AI costs are growing faster than revenue from AI services. We need to optimize our GPT-4o usage — consider implementing prompt caching and switching development workloads to GPT-4o-mini.
+2. Staffing Agency costs for contract engineers ($14,700/month) should transition to full-time hires by Q1 2026.
+3. Dell hardware purchases ($25,550 in Q3) need to be evaluated against Azure VM alternatives.
+
+Q4 FORECAST:
+- Revenue target: $6.1 million (15% QoQ growth)
+- Expense budget: $3.8 million
+- Key investments: Azure Fabric capacity (F4 SKU at $12,600/month), AI Search Premium tier, additional storage capacity
+- Headcount: 2 additional full-time hires (Sr. Data Engineer, AI Solutions Architect)
+
+ACTION ITEMS:
+1. James Park: Submit cloud cost optimization plan by Oct 15
+2. HR: Start recruiting for Q4 headcount additions immediately
+3. All VPs: Submit Q4 department budgets by Oct 10
+4. Michael Torres: Complete annual security audit prep for SOC 2
+
+Please review and share feedback by October 10.
+
+Best regards,
+Sarah Chen
+CFO, Contoso Financial Services

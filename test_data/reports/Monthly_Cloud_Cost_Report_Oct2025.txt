@@ -1,0 +1,73 @@
+MONTHLY CLOUD COST REPORT — OCTOBER 2025
+Prepared by: Cloud Center of Excellence (CCoE)
+Report Date: November 3, 2025
+
+EXECUTIVE SUMMARY
+Total Azure spend for October 2025 was $98,750, representing a 12% increase from September ($88,200). The increase is primarily driven by Azure AI Foundry deployment for Project RAGnarok and expanded Azure NetApp Files capacity.
+
+COST BREAKDOWN BY SERVICE:
+
+1. Azure NetApp Files: $9,500
+   - Capacity Pool: 1 TiB Flexible tier ($6,200)
+   - Cross-region replication: East US 2 → West US 2 ($2,100)
+   - Object REST API transactions ($1,200)
+   Note: Cool Access saved approximately $800 by tiering cold data
+
+2. Azure Virtual Machines: $8,200
+   - ANF-Gateway-VM (D2s_v3, Windows Server 2025): $140/month
+   - ML Training VMs (NC6s_v3 x2): $4,800/month
+   - Development VMs (B2ms x4): $640/month
+   - AKS Node Pool (D4s_v3 x3): $2,620/month
+
+3. Azure AI Services: $28,500
+   - Azure OpenAI (GPT-4o): $18,200
+     - Token usage: 45M input tokens, 12M output tokens
+     - Fine-tuning: $3,200
+   - Azure AI Search (Premium S1): $8,500
+     - Document count: 125,000
+     - Vector index storage: 2.1 GB
+   - Azure AI Foundry: $1,800 (new — Project RAGnarok setup)
+
+4. Microsoft Fabric: $12,600
+   - F4 SKU capacity: $12,600/month
+   - OneLake storage: Included in F4
+   - Data pipeline executions: Included in F4
+
+5. Networking: $3,200
+   - Azure Bastion (Standard): $2,100
+   - Azure Application Gateway (WAF v2): $850
+   - Data transfer (egress): $250
+
+6. Storage (non-ANF): $1,950
+   - Azure Blob Storage (Hot): $800
+   - Azure Backup (GRS): $1,150
+
+7. Security & Management: $2,400
+   - Azure Key Vault: $150
+   - Microsoft Defender for Cloud: $1,200
+   - Azure Monitor / Log Analytics: $1,050
+
+8. Other: $32,400
+   - Azure Kubernetes Service: $15,600
+   - Azure SQL Database: $8,400
+   - Azure Functions: $2,200
+   - Azure DevOps: $6,200
+
+TOP 5 COST GROWTH AREAS (MoM):
+1. Azure AI Services: +35% ($21,100 → $28,500) — RAGnarok expansion
+2. Microsoft Fabric: NEW ($0 → $12,600) — First month of F4 capacity
+3. Azure NetApp Files: +8% ($8,800 → $9,500) — Additional capacity
+4. Azure VMs: -5% ($8,600 → $8,200) — Decommissioned 2 dev VMs
+5. Networking: -3% ($3,300 → $3,200) — Bastion optimization
+
+COST OPTIMIZATION RECOMMENDATIONS:
+1. Implement Azure OpenAI prompt caching — estimated savings: $3,000/month
+2. Switch dev/test AI workloads to GPT-4o-mini — estimated savings: $5,000/month
+3. Right-size ML training VMs (NC6s → NC4as) — estimated savings: $1,200/month
+4. Enable auto-shutdown for dev VMs after 8 PM — estimated savings: $320/month
+5. Convert Gateway VM to B-series (B2s) — estimated savings: $80/month
+
+PROJECTED NOVEMBER SPEND: $105,000 (+6%)
+Primary driver: Full month of AI Foundry agent testing and additional AI Search indexing.
+
+For questions: ccoe@contoso-financial.com

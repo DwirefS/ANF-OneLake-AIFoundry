@@ -1,0 +1,82 @@
+CUSTOMER ANALYSIS REPORT — Q3 2025
+Prepared by: Business Intelligence Team
+Report Date: October 8, 2025
+
+1. CUSTOMER PORTFOLIO OVERVIEW
+Total active customers: 230
+New customers acquired in Q3: 23
+Churned customers in Q3: 5
+Net customer growth: +18 (8.5% QoQ)
+
+2. REVENUE BY CUSTOMER SEGMENT
+
+Enterprise (100+ employees):
+- Customers: 45
+- Q3 Revenue: $3,680,000 (69% of total)
+- Average revenue per customer: $81,778
+- Top 5 Enterprise customers:
+  1. Woodgrove Bank: $520,000 (Financial data processing + AI)
+  2. Trey Research: $385,000 (HPC + GPU clusters)
+  3. Contoso Ltd (parent): $310,000 (Cloud storage)
+  4. Adventure Works: $285,000 (AI training + inference)
+  5. Northwind Traders: $245,000 (Data backup + DR)
+
+Mid-Market (20-99 employees):
+- Customers: 85
+- Q3 Revenue: $1,120,000 (21% of total)
+- Average revenue per customer: $13,176
+
+SMB (under 20 employees):
+- Customers: 100
+- Q3 Revenue: $520,000 (10% of total)
+- Average revenue per customer: $5,200
+
+3. PRODUCT ADOPTION METRICS
+
+Azure NetApp Files:
+- Total deployed capacity: 85 TiB across all customers
+- Average volume size: 2.5 TiB
+- Protocol split: 60% NFSv3, 35% SMB, 5% dual-protocol
+- Object REST API adoption: 32 customers (14%) — up from 8 in Q2
+- S3 bucket creation rate: 45 new buckets in Q3
+
+Microsoft Fabric + OneLake:
+- Customers using Fabric shortcuts to ANF: 12 (new offering)
+- OneLake data virtualized from ANF: 15 TiB
+- Average query response time via shortcuts: 2.3 seconds
+
+Azure AI Search:
+- Customers with AI Search indexes: 18
+- Total documents indexed: 2.8 million
+- Average index size: 12 GB
+- Search queries per month: 450,000
+
+RAG Solutions:
+- Customers using RAG pipelines: 8 (pilot program)
+- Average queries per customer per day: 125
+- User satisfaction score: 4.2/5.0
+- Grounding accuracy: 91% (based on human evaluation)
+
+4. CUSTOMER SATISFACTION
+- Overall NPS: 72 (up from 68 in Q2)
+- Support ticket volume: 1,850 (down 12% QoQ)
+- Average resolution time: 4.2 hours (down from 5.1 hours)
+- Top complaint: "AI Search results sometimes include outdated documents" — addressed by implementing incremental indexing in September
+
+5. CHURN ANALYSIS
+Churned customers (5):
+- 2 migrated to competitor (pricing)
+- 1 acquired by another company
+- 1 went out of business
+- 1 consolidated services with parent company
+
+Churn rate: 2.2% (below 3% target)
+At-risk customers identified: 8 (assigned to retention team)
+
+6. Q4 GROWTH OPPORTUNITIES
+- 15 enterprise prospects in pipeline ($2.1M estimated annual value)
+- RAG solution expansion from 8 to 25 customers (target)
+- ANF Object REST API upsell to existing NFS/SMB customers
+- Fabric integration cross-sell to AI Search customers
+
+For questions: bi-team@contoso-financial.com

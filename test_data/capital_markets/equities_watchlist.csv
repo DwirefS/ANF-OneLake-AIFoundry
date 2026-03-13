@@ -1,0 +1,26 @@
+Ticker,Company,Sector,Price_USD,PE_Ratio,PB_Ratio,EPS_TTM,Revenue_B,NetIncome_B,DebtEquity,DividendYield_pct,52W_High,52W_Low,Beta,RSI_14d,Analyst_Target,Analyst_Rating
+AAPL,Apple Inc,Technology,182.5,29.4,47.3,6.16,383.3,97.0,1.73,0.55,199.6,124.2,1.24,58.7,193.0,Buy
+MSFT,Microsoft Corp,Technology,415.2,35.1,14.2,11.84,211.9,72.4,0.31,0.76,430.8,241.5,0.89,44.1,453.3,Strong Buy
+NVDA,NVIDIA Corp,Technology,875.3,68.2,44.8,12.96,60.9,29.8,0.42,0.02,974.0,260.9,1.98,60.0,1153.3,Strong Buy
+GOOGL,Alphabet Inc,Technology,172.8,26.3,6.9,6.52,307.4,73.8,0.07,0.0,193.3,102.2,1.06,56.8,183.1,Strong Buy
+META,Meta Platforms,Technology,527.1,28.9,8.1,18.23,134.9,39.1,0.14,0.0,531.5,157.5,1.22,43.1,633.4,Strong Buy
+JPM,JPMorgan Chase,Financials,198.4,12.1,1.8,16.23,158.1,49.6,1.24,2.31,209.1,130.2,1.11,55.8,250.9,Sell
+BAC,Bank of America,Financials,38.2,13.4,1.1,2.84,98.6,26.5,1.06,2.63,44.4,24.6,1.28,55.2,42.6,Hold
+GS,Goldman Sachs,Financials,482.3,14.2,1.4,33.95,46.3,8.5,2.11,2.17,503.1,295.1,1.31,45.3,632.2,Buy
+XOM,Exxon Mobil,Energy,104.2,14.1,1.9,7.38,398.7,36.0,0.19,3.42,123.7,95.8,0.81,60.8,120.0,Buy
+CVX,Chevron Corp,Energy,155.8,13.7,1.7,11.37,200.8,21.4,0.15,4.12,189.7,140.4,0.88,43.0,199.3,Strong Buy
+JNJ,Johnson & Johnson,Healthcare,155.3,15.8,5.2,9.82,85.2,13.8,0.41,3.17,178.7,143.1,0.53,38.4,167.6,Buy
+LLY,Eli Lilly,Healthcare,780.2,58.4,38.2,13.36,34.1,5.2,1.74,0.71,858.8,376.9,0.38,57.3,1008.1,Sell
+UNH,UnitedHealth Group,Healthcare,532.4,21.3,6.1,24.98,366.0,22.4,0.64,1.48,559.7,430.2,0.73,52.0,579.0,Hold
+WMT,Walmart Inc,Consumer Staples,61.5,28.7,5.9,2.14,648.1,15.5,1.73,1.27,67.4,49.9,0.61,37.9,70.0,Sell
+AMZN,Amazon.com Inc,Consumer Discretionary,185.4,62.1,9.3,2.99,574.8,30.4,0.28,0.0,201.2,101.2,1.15,57.9,242.6,Hold
+TSLA,Tesla Inc,Consumer Discretionary,248.5,78.2,9.8,3.17,97.7,15.0,0.08,0.0,299.3,152.4,2.41,42.1,266.1,Sell
+BRK.B,Berkshire Hathaway,Financials,388.2,21.4,1.4,18.14,364.5,96.2,0.18,0.0,394.5,318.1,0.88,43.4,441.3,Strong Buy
+V,Visa Inc,Financials,278.4,30.2,14.8,9.21,32.7,17.3,0.54,0.81,290.0,220.5,0.93,66.6,364.7,Hold
+MA,Mastercard Inc,Financials,467.3,36.4,59.2,12.83,25.1,11.2,13.41,0.57,490.0,350.1,1.04,45.3,579.8,Buy
+HD,Home Depot,Consumer Discretionary,345.2,22.1,292.1,15.61,153.7,17.1,999.9,2.52,396.5,274.3,1.03,41.0,399.3,Sell
+PG,Procter & Gamble,Consumer Staples,152.3,26.8,7.1,5.68,84.0,14.8,1.72,2.43,162.9,131.1,0.52,44.9,202.7,Sell
+KO,Coca-Cola Co,Consumer Staples,59.8,24.1,10.3,2.48,45.8,10.7,2.17,3.12,64.7,52.2,0.55,37.6,74.2,Hold
+DIS,Walt Disney Co,Communication Services,92.5,72.4,2.1,1.28,88.9,4.8,0.45,0.0,123.7,78.7,1.35,62.0,101.7,Hold
+NFLX,Netflix Inc,Communication Services,625.8,48.2,18.3,12.99,33.7,5.4,0.27,0.0,700.0,342.5,1.36,45.0,830.8,Sell
+CRM,Salesforce Inc,Technology,274.3,62.1,4.7,4.42,34.9,4.1,0.12,0.0,318.9,193.1,1.12,55.6,344.4,Strong Buy

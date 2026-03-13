@@ -1,0 +1,55 @@
+INTERNAL MEMO — CONFIDENTIAL
+From: James Park, VP of Engineering
+To: Engineering Team, Product Team
+Date: November 12, 2025
+Subject: Migration to Azure AI Foundry — Project RAGnarok
+
+Team,
+
+I'm excited to announce that we are officially beginning our migration from the legacy search and document processing pipeline to the new Azure AI Foundry-based RAG architecture. This project, codenamed "RAGnarok," will transform how our customers interact with their financial data.
+
+CURRENT STATE:
+- Documents stored on Azure NetApp Files (NFS/SMB volumes)
+- Manual search via Elasticsearch (self-hosted, 3 VMs)
+- No AI-assisted querying
+- Customer support handles 2,000+ document search requests/month
+
+TARGET STATE (by Q1 2026):
+- Documents remain on Azure NetApp Files (zero-copy architecture)
+- ANF Object REST API exposes files via S3-compatible endpoint
+- Microsoft Fabric OneLake shortcuts virtualize the data (no duplication)
+- Azure AI Search indexes documents with vector embeddings (text-embedding-ada-002)
+- Azure AI Foundry agents provide natural language querying with grounded responses
+- Expected reduction in support tickets: 60%
+
+ARCHITECTURE:
+1. Data Layer: Azure NetApp Files (Flexible tier, 1 TiB pool, Cool Access enabled)
+2. Object Layer: ANF Object REST API (S3-compatible, certificate-based auth)
+3. Virtualization: OneLake shortcuts via On-Premises Data Gateway (OPDG)
+4. Index Layer: Azure AI Search (Premium, integrated vectorization)
+5. AI Layer: Azure AI Foundry with GPT-4o grounded agents
+6. Security: Managed identities, Key Vault for secrets, customer-managed keys
+
+TIMELINE:
+- Phase 1 (Nov 2025): Infrastructure setup — ANF, Fabric, OPDG configuration
+- Phase 2 (Dec 2025): AI Search index creation and document processing pipeline
+- Phase 3 (Jan 2026): AI Foundry agent development and testing
+- Phase 4 (Feb 2026): Beta launch with 5 pilot customers
+- Phase 5 (Mar 2026): General availability
+
+RESOURCE REQUIREMENTS:
+- Azure monthly cost increase: ~$35,000 (Fabric F4: $12,600, AI Search Premium: $8,500, AI Foundry: $10,000, additional ANF: $3,900)
+- Engineering: 2 dedicated engineers full-time for 4 months
+- Budget approved by Sarah Chen (CFO) on October 28, 2025
+
+KEY DECISIONS NEEDED:
+1. Embedding model: text-embedding-ada-002 vs text-embedding-3-large — recommendation is ada-002 for cost efficiency
+2. Agent personality: Professional financial advisor vs friendly assistant — TBD in UX review
+3. Document types to index in Phase 2: Start with invoices and expense reports, expand to policies and contracts in Phase 3
+
+Please join the kickoff meeting on November 18 at 2 PM ET in the main conference room (or Teams link TBD).
+
+Let's build something great.
+
+James Park
+VP of Engineering, Contoso Financial Services

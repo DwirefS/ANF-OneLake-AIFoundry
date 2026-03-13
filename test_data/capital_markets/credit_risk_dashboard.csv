@@ -1,0 +1,16 @@
+Company,Ticker,Sector,SP_Rating,CDS_Spread_bps,DefaultProb_1Y_pct,CreditScore,Outlook,CreditTier,RiskLevel,InterestCoverageRatio,NetDebt_B,EBITDA_B,Altman_Z_Score
+Apple Inc,AAPL,Technology,AA+,28,0.01,9.2,Stable,IG,Minimal,7.4,55.8,18.9,1.57
+Microsoft,MSFT,Technology,AAA,22,0.01,9.8,Stable,IG,Minimal,2.6,90.3,53.7,0.84
+Amazon,AMZN,Consumer Disc,AA,58,0.04,8.7,Stable,IG,Low,9.3,65.0,77.7,2.86
+Tesla,TSLA,Consumer Disc,BB,312,1.21,5.1,Positive,HY,Medium,14.3,100.9,65.7,2.17
+Ford Motor,F,Consumer Disc,BB+,148,0.74,5.8,Stable,HY,Medium,13.9,104.0,38.5,4.03
+Delta Air Lines,DAL,Industrials,BB-,285,1.42,4.9,Stable,HY,Medium-High,12.5,9.5,72.3,3.36
+Carnival Corp,CCL,Consumer Disc,B+,480,3.18,3.8,Stable,HY,High,13.1,108.1,64.2,3.21
+GameStop,GME,Consumer Disc,B-,820,8.42,2.1,Negative,HY,Very High,15.9,14.4,60.8,1.19
+SVB Financial,SIVB,Financials,D,9999,99.0,0.0,Default,Distressed,Extreme,24.6,116.7,64.9,1.0
+Bed Bath Beyond,BBBY,Consumer Disc,D,9999,99.0,0.0,Default,Distressed,Extreme,11.2,118.6,35.4,4.49
+JPMorgan,JPM,Financials,A-,45,0.08,8.9,Stable,IG,Low,16.1,100.1,21.4,4.14
+Goldman Sachs,GS,Financials,BBB+,72,0.19,7.8,Stable,IG,Low,22.9,8.0,31.7,2.09
+Exxon Mobil,XOM,Energy,AA,31,0.02,8.6,Stable,IG,Minimal,8.9,33.1,37.2,3.99
+Chevron,CVX,Energy,AA,29,0.02,8.8,Stable,IG,Minimal,19.9,74.8,42.3,2.18
+Beyond Meat,BYND,Consumer Staples,CCC+,2100,18.4,1.2,Negative,Distressed,Very High,11.0,17.8,47.4,3.53

@@ -1,0 +1,56 @@
+CONTOSO FINANCIAL SERVICES — DATA GOVERNANCE AND SECURITY POLICY
+Document ID: POL-SEC-2025-003
+Effective Date: February 1, 2025
+Last Revised: February 28, 2025
+Approved By: Michael Torres, CISO
+
+1. PURPOSE
+This policy establishes the framework for data governance, classification, protection, and lifecycle management at Contoso Financial Services. Given our handling of sensitive financial data, adherence to this policy is mandatory.
+
+2. DATA CLASSIFICATION LEVELS
+2.1 PUBLIC: Marketing materials, press releases, published reports
+2.2 INTERNAL: Employee directories, internal memos, project documentation
+2.3 CONFIDENTIAL: Customer financial data, contract terms, pricing models, vendor agreements
+2.4 RESTRICTED: PII (Personally Identifiable Information), payment card data, trade secrets, M&A information
+
+3. DATA STORAGE REQUIREMENTS
+3.1 All financial data must be stored on approved platforms:
+    - Primary: Azure NetApp Files (ANF) with encryption at rest (AES-256)
+    - Analytics: Microsoft Fabric OneLake with managed identity access
+    - Search/AI: Azure AI Search with customer-managed keys
+    - Backup: Azure Backup with geo-redundant storage (GRS)
+3.2 Data residency: All customer financial data must remain within US boundaries (East US, East US 2, West US 2 regions)
+3.3 Cross-region replication is permitted only within approved US regions
+3.4 Object storage (S3-compatible API on ANF): Access keys must be rotated every 365 days
+
+4. ACCESS CONTROL
+4.1 Principle of least privilege: Users receive minimum permissions needed for their role
+4.2 Multi-factor authentication (MFA) is required for all access to financial systems
+4.3 Service accounts must use managed identities where possible
+4.4 API keys and secrets must be stored in Azure Key Vault
+4.5 Access reviews are conducted quarterly by department heads
+
+5. DATA PROCESSING AND AI
+5.1 AI models processing financial data must use Azure AI Foundry with data grounding
+5.2 RAG (Retrieval-Augmented Generation) pipelines must source data from approved indexes only
+5.3 No customer financial data may be sent to external AI services
+5.4 AI model outputs involving financial advice must include compliance disclaimers
+5.5 All AI agent interactions are logged for audit purposes
+
+6. DATA RETENTION
+6.1 Financial transaction records: 7 years (regulatory requirement)
+6.2 Customer correspondence: 5 years
+6.3 Internal memos and reports: 3 years
+6.4 AI model training data: Duration of model lifecycle + 2 years
+6.5 Audit logs: 10 years
+
+7. INCIDENT RESPONSE
+7.1 Data breaches must be reported to the CISO within 1 hour of discovery
+7.2 Affected customers must be notified within 72 hours per regulatory requirements
+7.3 All incidents are documented in the Contoso Incident Management System (CIMS)
+7.4 Post-incident reviews are conducted within 5 business days
+
+8. COMPLIANCE FRAMEWORKS
+This policy aligns with: SOC 2 Type II, PCI DSS v4.0, GDPR (for EU customer data), CCPA, and SEC Regulation S-P.
+
+For questions, contact: security-governance@contoso-financial.com

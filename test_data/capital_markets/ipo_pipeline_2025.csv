@@ -1,0 +1,11 @@
+Company,ExpectedTicker,Sector,HQ,Business,ExpectedIPO,Status,Valuation_B,Underwriters,Exchange,Revenue_B,Employees,IPO_Price,Day1_Close,Notes
+Databricks,DBKS,Technology,San Francisco CA,AI/ML Data Platform,2025-Q2,Pending,62.0,Goldman Sachs / Morgan Stanley,NYSE,15.2,8800,,,Pre-IPO: Valued at $62B in last round. Strong enterprise AI tailwinds.
+Klarna,KLAR,Fintech,Stockholm Sweden,Buy Now Pay Later,2025-Q2,Filed,15.0,Goldman Sachs / JPMorgan,NYSE,1.8,6700,,,Swedish BNPL giant. 150M users globally. Profitable since 2023.
+Stripe,STRP,Fintech,San Francisco CA,Payment Processing,2025-Q3,Rumored,65.0,Morgan Stanley,NASDAQ,14.3,3200,,,Last valuation $65B. IPO repeatedly delayed. Strong fundamentals.
+Reddit,RDDT,Social Media,San Francisco CA,Social Platform,2024-Q1,Completed,6.4,Morgan Stanley / Goldman,NYSE,0.8,748,34.0,47.82,"Priced at $34, up 48% on Day 1. First social IPO since Pinterest 2019."
+Waymo,WAMO,Autonomous Vehicles,Mountain View CA,Robotaxi Service,2025-Q4,Rumored,45.0,TBD,TBD,,,,,Alphabet subsidiary. San Francisco robotaxi operations expanding.
+Chime,CHME,Fintech,San Francisco CA,Neobank,2025-Q3,Filed,25.0,Goldman Sachs,NYSE,1.3,1400,,,Largest US neobank. 22M customers. Profitable 2024.
+SpaceX Starlink,SXLK,Technology,Hawthorne CA,Satellite Internet,2025-Q4,Rumored,150.0,TBD,NYSE,8.7,,,,Spinoff of Starlink division only. 3M+ subscribers globally.
+CoreWeave,CRWV,Technology,Roseland NJ,GPU Cloud,2025-Q1,Completed,19.0,Goldman Sachs / JPMorgan,NASDAQ,1.9,1500,40.0,54.2,"NVIDIA-backed GPU cloud. Priced $40, strong open. AI infrastructure play."
+Canva,CANVA,Technology,Sydney Australia,Design Platform,2025-Q3,Rumored,26.0,TBD,NASDAQ,1.7,4200,,,"Profitable SaaS. 170M users. Resisted IPO pressure, now considering."
+Shein,SHEI,Consumer,Singapore,Fast Fashion,2025-H2,Filed,66.0,Goldman Sachs,LSE,24.0,,,,Ultra-fast fashion platform. Controversial supply chain. UK listing preferred.

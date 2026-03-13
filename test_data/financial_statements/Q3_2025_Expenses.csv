@@ -1,0 +1,16 @@
+Date,TransactionID,Vendor,Category,Amount,Description,Status
+2025-07-03,TRX-11234,Azure Cloud Services,Cloud Infrastructure,8750.00,Azure NetApp Files - Monthly Storage 500GiB,Posted
+2025-07-10,TRX-11456,Dell Computers,Hardware,12450.00,PowerEdge R760 Server - Data Processing Node,Posted
+2025-07-15,TRX-11678,Salesforce,Software License,3200.00,Enterprise CRM License - Q3 Renewal,Posted
+2025-07-22,TRX-11890,WeWork,Rent,7500.00,Office Space - 40th Floor Manhattan July,Posted
+2025-08-01,TRX-12102,Azure Cloud Services,Cloud Infrastructure,15200.00,Azure AI Services - GPT-4o Inference Costs,Posted
+2025-08-05,TRX-12314,Staffing Agency,Personnel,9800.00,Contract Data Engineer - August Placement,Posted
+2025-08-12,TRX-12526,Slack,Communication,450.00,Slack Business+ - 30 Seats Monthly,Posted
+2025-08-18,TRX-12738,OfficeMax,Office Supplies,890.50,Printer Supplies and Paper Stock,Posted
+2025-08-25,TRX-12950,Azure Cloud Services,Cloud Infrastructure,6300.00,Azure Kubernetes Service - ML Pipeline Cluster,Posted
+2025-09-01,TRX-13162,WeWork,Rent,7500.00,Office Space - 40th Floor Manhattan September,Posted
+2025-09-08,TRX-13374,Dell Computers,Hardware,4200.00,Latitude 7440 Laptops x3 - New Hires,Posted
+2025-09-15,TRX-13586,Azure Cloud Services,Cloud Infrastructure,11800.00,Azure AI Search - Premium Tier Monthly,Posted
+2025-09-20,TRX-13798,Salesforce,Software License,1600.00,Tableau Analytics License - 5 Seats,Posted
+2025-09-28,TRX-14010,Zoom,Communication,320.00,Zoom Business - 25 Hosts Monthly,Posted
+2025-09-30,TRX-14222,Staffing Agency,Personnel,9800.00,Contract Data Engineer - September Placement,Posted

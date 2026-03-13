@@ -1,0 +1,25 @@
+Quarter,Month,RevenueStream,CustomerSegment,Amount,ContractType,Region
+Q1,January,Cloud Storage Services,Enterprise,420000.00,Annual,East US
+Q1,January,AI Analytics Platform,Mid-Market,185000.00,Monthly,East US 2
+Q1,February,Cloud Storage Services,Enterprise,435000.00,Annual,East US
+Q1,February,RAG Solutions,Enterprise,210000.00,Project,West US 2
+Q1,March,Cloud Storage Services,Enterprise,450000.00,Annual,East US
+Q1,March,Data Processing,Mid-Market,165000.00,Monthly,East US 2
+Q2,April,Cloud Storage Services,Enterprise,462000.00,Annual,East US
+Q2,April,AI Analytics Platform,Enterprise,290000.00,Annual,East US 2
+Q2,May,Cloud Storage Services,Enterprise,475000.00,Annual,East US
+Q2,May,RAG Solutions,Mid-Market,178000.00,Project,West US 2
+Q2,June,Cloud Storage Services,Enterprise,488000.00,Annual,East US
+Q2,June,Object Storage API,Enterprise,145000.00,Monthly,East US 2
+Q3,July,Cloud Storage Services,Enterprise,502000.00,Annual,East US
+Q3,July,AI Analytics Platform,Enterprise,310000.00,Annual,East US 2
+Q3,August,Cloud Storage Services,Enterprise,518000.00,Annual,East US
+Q3,August,RAG Solutions,Enterprise,265000.00,Project,West US 2
+Q3,September,Cloud Storage Services,Enterprise,535000.00,Annual,East US
+Q3,September,Data Processing,Mid-Market,195000.00,Monthly,East US 2
+Q4,October,Cloud Storage Services,Enterprise,550000.00,Annual,East US
+Q4,October,Azure NetApp Files Object API,Enterprise,220000.00,Monthly,East US 2
+Q4,November,Cloud Storage Services,Enterprise,568000.00,Annual,East US
+Q4,November,AI Foundry Integration,Enterprise,340000.00,Project,East US 2
+Q4,December,Cloud Storage Services,Enterprise,585000.00,Annual,East US
+Q4,December,RAG Solutions,Enterprise,380000.00,Project,West US 2

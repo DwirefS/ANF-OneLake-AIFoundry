@@ -1,0 +1,18 @@
+Date,TransactionID,Vendor,Category,Amount,Description,Status
+2025-10-01,TRX-20100,Azure Cloud Services,Cloud Infrastructure,9500.00,Azure NetApp Files - Monthly Storage 750GiB Expanded,Posted
+2025-10-05,TRX-20312,WeWork,Rent,7500.00,Office Space - 40th Floor Manhattan October,Posted
+2025-10-10,TRX-20524,Azure Cloud Services,Cloud Infrastructure,18500.00,Azure AI Foundry - Agent Runtime and Compute,Posted
+2025-10-15,TRX-20736,Salesforce,Software License,3200.00,Enterprise CRM License - Q4 Renewal,Posted
+2025-10-20,TRX-20948,Dell Computers,Hardware,8900.00,PowerEdge Storage Array - OneLake Migration,Posted
+2025-11-01,TRX-21160,Azure Cloud Services,Cloud Infrastructure,22000.00,Azure OpenAI - GPT-4o Fine-tuning Project,Posted
+2025-11-05,TRX-21372,Staffing Agency,Personnel,14700.00,Senior ML Engineer - November Contract,Posted
+2025-11-10,TRX-21584,Slack,Communication,450.00,Slack Business+ - 30 Seats Monthly,Posted
+2025-11-15,TRX-21796,OfficeMax,Office Supplies,1250.00,Year-end Office Supply Restocking,Posted
+2025-11-20,TRX-22008,Azure Cloud Services,Cloud Infrastructure,7800.00,Azure AI Search - Vector Index Storage Premium,Posted
+2025-12-01,TRX-22220,WeWork,Rent,7500.00,Office Space - 40th Floor Manhattan December,Posted
+2025-12-05,TRX-22432,Azure Cloud Services,Cloud Infrastructure,12600.00,Azure Fabric Capacity - F4 SKU Monthly,Posted
+2025-12-10,TRX-22644,Zoom,Communication,320.00,Zoom Business - 25 Hosts Monthly,Posted
+2025-12-15,TRX-22856,Dell Computers,Hardware,6500.00,Network Switches - Office Infrastructure Upgrade,Posted
+2025-12-20,TRX-23068,Salesforce,Software License,5400.00,Salesforce Data Cloud - Annual License,Posted
+2025-12-28,TRX-23280,Staffing Agency,Personnel,14700.00,Senior ML Engineer - December Contract,Posted
+2025-12-31,TRX-23492,Azure Cloud Services,Cloud Infrastructure,3200.00,Azure Backup - Year-end DR Validation,Posted

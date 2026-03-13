@@ -1,0 +1,19 @@
+Ticker,Company,Sector,ReportDate,Timing,Quarter,Revenue_Estimate_B,EPS_Estimate,EPS_Actual,EPS_Surprise,Revenue_Surprise,Price_After_Earnings,Price_Change_pct,Notes
+AAPL,Apple Inc,Technology,2025-01-30,After Market,Q1 FY2025,119.87,2.35,2.41,Beat,Beat,194.5,5.2,
+MSFT,Microsoft Corp,Technology,2025-01-29,After Market,Q2 FY2025,69.83,3.1,3.23,Beat,Beat,415.8,8.4,Strong cloud growth
+AMZN,Amazon.com,Consumer Disc,2025-02-06,After Market,Q4 2024,187.79,1.48,1.86,Beat,Beat,227.0,12.7,
+GOOGL,Alphabet,Technology,2025-02-04,After Market,Q4 2024,96.47,2.15,2.15,In-line,Beat,179.1,6.1,AI capex concerns raised
+META,Meta Platforms,Technology,2025-01-29,After Market,Q4 2024,48.39,8.02,8.02,In-line,Beat,598.0,2.3,
+NVDA,NVIDIA Corp,Technology,2025-02-26,After Market,Q4 FY2025,39.33,0.84,0.89,Beat,Beat,131.4,15.3,
+JPM,JPMorgan Chase,Financials,2025-01-15,Pre Market,Q4 2024,41.48,4.18,4.81,Beat,Beat,231.0,4.8,
+GS,Goldman Sachs,Financials,2025-01-15,Pre Market,Q4 2024,13.87,8.22,11.95,Beat,Beat,579.0,9.7,
+BAC,Bank of America,Financials,2025-01-16,Pre Market,Q4 2024,25.35,0.77,0.82,Beat,Beat,47.0,6.2,
+TSLA,Tesla Inc,Consumer Disc,2025-01-29,After Market,Q4 2024,25.71,0.73,0.71,Miss,Beat,371.0,-11.2,Cybertruck ramp
+XOM,Exxon Mobil,Energy,2025-01-31,Pre Market,Q4 2024,83.18,1.72,1.67,Miss,In-line,103.0,-2.8,
+UNH,UnitedHealth,Healthcare,2025-01-16,Pre Market,Q4 2024,100.81,6.81,6.74,Miss,Miss,478.0,-5.1,
+LLY,Eli Lilly,Healthcare,2025-02-05,Pre Market,Q4 2024,13.53,5.32,4.02,Miss,Miss,731.0,-14.3,GLP-1 guidance cut
+V,Visa Inc,Financials,2025-01-28,After Market,Q1 FY2025,9.5,2.74,2.75,Beat,Beat,339.0,2.1,
+WMT,Walmart,Consumer Staples,2025-02-20,Pre Market,Q4 FY2025,180.55,0.64,0.66,Beat,Beat,95.0,3.8,
+NFLX,Netflix,Comm Services,2025-01-21,After Market,Q4 2024,10.25,4.27,4.27,In-line,Beat,945.0,14.2,
+DIS,Walt Disney,Comm Services,2025-02-05,Pre Market,Q1 FY2025,24.69,1.44,1.76,Beat,Beat,110.0,7.9,
+CRM,Salesforce,Technology,2025-02-26,After Market,Q4 FY2025,9.99,2.29,2.78,Beat,Beat,310.0,4.1,

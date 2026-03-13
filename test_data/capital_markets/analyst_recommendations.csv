@@ -1,0 +1,16 @@
+Ticker,Company,Sector,Rating,Action,PriceTarget_USD,CurrentPrice_USD,Analyst_Firm,ReportDate,KeyThesis,Upside_pct,ConsensusRating,NumAnalysts_Buy,NumAnalysts_Hold,NumAnalysts_Sell
+AAPL,Apple Inc,Technology,Overweight,BUY,220.00,198.45,JPMorgan,2025-02-15,"Services growth acceleration, Vision Pro ecosystem",10.9,Buy,15,4,2
+MSFT,Microsoft Corp,Technology,Outperform,BUY,500.00,415.2,Goldman Sachs,2025-02-10,"Azure AI consumption inflecting, Copilot monetization",20.4,Hold,23,9,2
+NVDA,NVIDIA Corp,Technology,Outperform,STRONG BUY,1000.00,875.3,Morgan Stanley,2025-02-20,"Data center demand structural, sovereign AI spending",14.2,Hold,27,10,0
+GOOGL,Alphabet,Technology,Buy,BUY,210.00,172.8,BofA Securities,2025-01-28,"Search AI transition, YouTube monetization",21.5,Buy,20,9,1
+META,Meta Platforms,Technology,Overweight,BUY,700.00,527.1,Barclays,2025-02-05,"Reels ROI, llama moat, Reality Labs optionality",32.8,Hold,24,3,3
+TSLA,Tesla Inc,Consumer Disc,Equal Weight,HOLD,250.00,248.5,Morgan Stanley,2025-01-30,"Optimus robot potential, near-term margin pressure",0.6,Buy,19,3,3
+JPM,JPMorgan Chase,Financials,Overweight,BUY,260.00,198.4,Wells Fargo,2025-01-17,"Best-in-class management, NII tailwind",31.0,Buy,23,3,2
+LLY,Eli Lilly,Healthcare,Outperform,BUY,1000.00,780.2,Credit Suisse,2025-02-07,"GLP-1 market dominance, pipeline deep bench",28.2,Buy,21,7,3
+XOM,Exxon Mobil,Energy,Neutral,HOLD,110.00,104.2,Citigroup,2025-01-31,Strong FCF but oil macro uncertainty,5.6,Buy,19,5,2
+AMZN,Amazon.com,Consumer Disc,Outperform,BUY,240.00,185.4,Cowen,2025-02-08,"AWS reacceleration, advertising EBIT expansion",29.4,Hold,22,7,3
+NFLX,Netflix,Comm Services,Overweight,BUY,750.00,625.8,Piper Sandler,2025-01-22,"Password sharing windfall, ads tier scaling",19.8,Hold,14,6,3
+DIS,Walt Disney,Comm Services,Equal Weight,HOLD,115.00,92.5,Guggenheim,2025-02-06,Streaming profitability offset by parks slowdown,24.3,Buy,25,10,4
+BAC,Bank of America,Financials,Buy,BUY,55.00,38.2,Deutsche Bank,2025-01-17,"Rate sensitivity positive, loan growth recovering",44.0,Buy,13,5,0
+CVX,Chevron,Energy,Outperform,BUY,175.00,155.8,Raymond James,2025-02-01,"Hess deal accretive, Permian upside",12.3,Buy,28,9,1
+CRM,Salesforce,Technology,Outperform,BUY,350.00,274.3,Mizuho,2025-02-27,"Agentforce TAM significant, margin expansion",27.6,Hold,12,5,1

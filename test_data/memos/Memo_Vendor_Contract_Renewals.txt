@@ -1,0 +1,73 @@
+INTERNAL MEMO
+From: Lisa Rodriguez, Procurement Manager
+To: Department Heads
+Date: December 1, 2025
+Subject: Upcoming Vendor Contract Renewals — Q1 2026
+
+Department Heads,
+
+The following vendor contracts are coming up for renewal in Q1 2026. Please review the terms and provide your input on whether to renew, renegotiate, or terminate.
+
+CONTRACTS UP FOR RENEWAL:
+
+1. AZURE CLOUD SERVICES (Microsoft Enterprise Agreement)
+   Current Annual Spend: $1.2 million
+   Renewal Date: January 31, 2026
+   Contract Term: 3-year EA
+   Proposed Changes: Increase reserved instance commitments for ANF and AI services
+   Negotiation Status: Microsoft offering 12% discount on 3-year commitment
+   Decision Needed By: January 10, 2026
+   Owner: James Park (Engineering)
+
+2. SALESFORCE (Enterprise CRM)
+   Current Annual Spend: $38,400
+   Renewal Date: February 15, 2026
+   Contract Term: Annual
+   Proposed Changes: Add 10 additional user licenses for new hires
+   New Annual Cost: $51,200 (33% increase)
+   Decision Needed By: January 20, 2026
+   Owner: Mark Davis (Sales)
+
+3. WEWORK (Office Space)
+   Current Monthly Rent: $7,500
+   Renewal Date: March 1, 2026
+   Contract Term: Annual
+   Proposed Changes: WeWork offering 5% discount for 2-year commitment
+   Alternative: Upgrade to larger space at $9,200/month (additional 800 sq ft)
+   Decision Needed By: February 1, 2026
+   Owner: Operations
+
+4. DELL COMPUTERS (Hardware Support)
+   Current Annual Spend: ~$45,000 (variable)
+   Renewal Date: February 28, 2026
+   Contract Term: Annual maintenance agreement
+   Note: James Park recommends reducing hardware purchases and increasing Azure VM usage
+   Decision Needed By: February 10, 2026
+   Owner: James Park (Engineering)
+
+5. SLACK (Business+ Plan)
+   Current Monthly Cost: $450 (30 seats)
+   Renewal Date: January 15, 2026
+   Contract Term: Monthly
+   Proposed Changes: Switch to annual billing for 15% savings ($4,590/year vs $5,400)
+   Decision Needed By: January 5, 2026
+   Owner: IT
+
+6. STAFFING AGENCY (Contract Engineers)
+   Current Monthly Cost: $14,700 (1 senior ML engineer)
+   Contract End Date: March 31, 2026
+   Proposed Changes: Convert to full-time hire (est. salary: $185,000 + benefits)
+   Savings: ~$16,400/year versus continued contracting
+   Decision Needed By: February 15, 2026
+   Owner: HR + James Park
+
+TOTAL RENEWAL IMPACT:
+- Current annual vendor spend: ~$1.65 million
+- Projected 2026 annual spend (if all renewed): ~$1.82 million
+- YoY increase: 10.3%
+
+Please schedule a 30-minute review with me before the decision deadlines listed above.
+
+Lisa Rodriguez
+Procurement Manager, Contoso Financial Services
+lisa.rodriguez@contoso-financial.com

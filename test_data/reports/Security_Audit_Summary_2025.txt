@@ -1,0 +1,69 @@
+ANNUAL SECURITY AUDIT SUMMARY — 2025
+Prepared by: Michael Torres, CISO
+Audit Firm: Deloitte Cybersecurity Practice
+Audit Period: January 1, 2025 — December 31, 2025
+Report Date: January 15, 2026
+
+1. AUDIT SCOPE
+This audit evaluated Contoso Financial Services' information security controls, data protection practices, and compliance with SOC 2 Type II, PCI DSS v4.0, and internal security policies. The audit covered all production systems, including Azure cloud infrastructure, Azure NetApp Files storage, Microsoft Fabric analytics platform, and Azure AI services.
+
+2. OVERALL RATING: SATISFACTORY (with 3 findings)
+
+3. KEY FINDINGS
+
+Finding 1: MODERATE — S3 Access Key Rotation Not Automated
+Description: Azure NetApp Files Object REST API access keys are generated with manual lifespans (365 days). There is no automated rotation mechanism.
+Risk: If a key is compromised, it could provide unauthorized access to financial documents for up to 365 days.
+Recommendation: Implement automated key rotation every 90 days using Azure Automation or Logic Apps. Store keys in Azure Key Vault with expiration alerts.
+Management Response: Accepted. Will implement automated rotation by March 2026. James Park (Engineering) assigned as owner.
+
+Finding 2: LOW — On-Premises Data Gateway (OPDG) Running on Single VM
+Description: The OPDG connecting Azure NetApp Files to Microsoft Fabric OneLake runs on a single Windows VM (ANF-Gateway-VM). No failover or redundancy exists.
+Risk: Gateway VM failure would disrupt OneLake data virtualization and AI Search indexing until the VM is recovered.
+Recommendation: Deploy a second OPDG VM in a different availability zone and configure the gateway cluster for high availability.
+Management Response: Accepted. Redundant gateway planned for Q2 2026 deployment. Estimated cost: $140/month for second B2s VM.
+
+Finding 3: LOW — AI Agent Interaction Logs Lack Detailed Classification
+Description: Azure AI Foundry agent interactions are logged, but logs do not classify the sensitivity level of data accessed during each query.
+Risk: Compliance auditors may not be able to determine if RESTRICTED data was accessed without manual log review.
+Recommendation: Implement structured logging that tags each AI agent response with the data classification level of source documents used for grounding.
+Management Response: Accepted. Will add classification tagging to the RAG pipeline metadata by April 2026.
+
+4. CONTROLS TESTED AND RESULTS
+
+Access Control:
+- MFA enforcement: PASS — 100% of users have MFA enabled
+- Privileged access management: PASS — PIM enabled for all admin roles
+- Service account review: PASS — 15 service accounts reviewed, 2 deprecated
+- API key management: PARTIAL PASS — See Finding 1
+
+Data Protection:
+- Encryption at rest (ANF): PASS — AES-256 platform-managed keys
+- Encryption in transit: PASS — TLS 1.2+ enforced on all endpoints
+- Backup and recovery: PASS — Daily backups tested quarterly
+- Data classification: PASS — 95% of documents classified correctly
+
+Network Security:
+- Network segmentation: PASS — ANF in dedicated subnet, no public IPs
+- Bastion access: PASS — All RDP/SSH access through Bastion
+- Firewall rules: PASS — Azure Firewall with deny-by-default
+- DDoS protection: PASS — Azure DDoS Protection Standard enabled
+
+AI and Analytics Security:
+- AI model access control: PASS — Managed identities used
+- AI Search encryption: PASS — Customer-managed keys via Key Vault
+- Fabric workspace permissions: PASS — RBAC enforced
+- AI interaction logging: PARTIAL PASS — See Finding 3
+
+5. COMPLIANCE STATUS
+- SOC 2 Type II: COMPLIANT (no critical findings)
+- PCI DSS v4.0: COMPLIANT (no card data processed directly)
+- CCPA: COMPLIANT (privacy controls verified)
+- SEC Regulation S-P: COMPLIANT (customer data protection verified)
+
+6. YEAR-OVER-YEAR COMPARISON
+- 2024 findings: 5 (2 moderate, 3 low)
+- 2025 findings: 3 (1 moderate, 2 low)
+- Improvement: 40% reduction in findings
+
+For questions: security-audit@contoso-financial.com

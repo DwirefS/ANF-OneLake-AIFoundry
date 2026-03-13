@@ -1,0 +1,55 @@
+CONTOSO FINANCIAL SERVICES — EXPENSE REIMBURSEMENT POLICY
+Document ID: POL-FIN-2025-001
+Effective Date: January 1, 2025
+Last Revised: March 15, 2025
+Approved By: Sarah Chen, CFO
+
+1. PURPOSE
+This policy establishes guidelines for the reimbursement of business expenses incurred by employees of Contoso Financial Services. All employees are expected to exercise good judgment and fiscal responsibility when incurring expenses on behalf of the company.
+
+2. SCOPE
+This policy applies to all full-time and part-time employees, contractors, and consultants who incur business-related expenses.
+
+3. APPROVAL THRESHOLDS
+- Expenses under $500: Direct manager approval required
+- Expenses $500 to $2,500: Department head approval required
+- Expenses $2,500 to $10,000: VP-level approval required
+- Expenses over $10,000: CFO approval required
+- Capital expenditures over $25,000: CEO and Board approval required
+
+4. TRAVEL EXPENSES
+4.1 Airfare: Economy class for domestic flights. Business class permitted for international flights over 6 hours.
+4.2 Hotels: Maximum $350/night for Tier 1 cities (NYC, SF, LA, Chicago, DC). Maximum $250/night for all other locations.
+4.3 Meals: Maximum $75/day for domestic travel. Maximum $100/day for international travel.
+4.4 Ground Transportation: Uber/Lyft permitted. Rental cars require pre-approval for trips over 3 days.
+
+5. TECHNOLOGY AND SOFTWARE
+5.1 Software subscriptions under $50/month: Manager approval
+5.2 Software subscriptions $50-$500/month: IT department review + department head approval
+5.3 Cloud infrastructure costs: Must be routed through the Cloud Center of Excellence (CCoE)
+5.4 Azure services: All Azure consumption must be tagged with cost center and project code
+
+6. VENDOR PAYMENTS
+6.1 All vendor payments over $5,000 require a purchase order (PO)
+6.2 Preferred vendors: Azure Cloud Services, Dell Computers, Salesforce, WeWork, Slack, Zoom
+6.3 New vendor onboarding requires Finance team approval and W-9 collection
+6.4 Payment terms: Net 30 for standard vendors, Net 15 for cloud service providers
+
+7. EXPENSE REPORTING
+7.1 Expense reports must be submitted within 30 days of incurring the expense
+7.2 Receipts are required for all expenses over $25
+7.3 Reports submitted after 60 days may be denied
+7.4 All reports are processed through the Contoso Expense Management System (CEMS)
+
+8. NON-REIMBURSABLE EXPENSES
+- Personal entertainment and streaming services
+- Traffic violations and parking tickets
+- Alcoholic beverages (except at client-facing events with VP approval)
+- First-class airfare upgrades
+- Personal cell phone plans (company provides devices)
+- Gym memberships (covered under employee wellness program separately)
+
+9. COMPLIANCE
+Violation of this policy may result in denial of reimbursement, disciplinary action, or termination. Fraudulent expense claims will be referred to Legal and may result in prosecution.
+
+For questions, contact: finance-policy@contoso-financial.com

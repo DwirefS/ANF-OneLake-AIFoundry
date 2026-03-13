@@ -1,0 +1,26 @@
+VendorName,VendorID,PaymentDate,InvoiceNumber,Amount,PaymentMethod,DaysToPay,Status
+Azure Cloud Services,V-001,2025-01-15,AZ-2025-0001,8750.00,Wire Transfer,12,Completed
+Azure Cloud Services,V-001,2025-02-15,AZ-2025-0002,9200.00,Wire Transfer,14,Completed
+Azure Cloud Services,V-001,2025-03-15,AZ-2025-0003,11500.00,Wire Transfer,11,Completed
+Dell Computers,V-002,2025-01-20,DELL-2025-001,12450.00,ACH,22,Completed
+Dell Computers,V-002,2025-04-10,DELL-2025-002,4200.00,ACH,18,Completed
+WeWork,V-003,2025-01-01,WW-2025-JAN,7500.00,Wire Transfer,1,Completed
+WeWork,V-003,2025-02-01,WW-2025-FEB,7500.00,Wire Transfer,1,Completed
+WeWork,V-003,2025-03-01,WW-2025-MAR,7500.00,Wire Transfer,1,Completed
+Salesforce,V-004,2025-01-10,SF-2025-Q1,3200.00,Credit Card,5,Completed
+Salesforce,V-004,2025-04-10,SF-2025-Q2,3200.00,Credit Card,5,Completed
+Staffing Agency,V-005,2025-02-01,SA-2025-FEB,9800.00,ACH,15,Completed
+Staffing Agency,V-005,2025-03-01,SA-2025-MAR,9800.00,ACH,15,Completed
+Slack,V-006,2025-01-05,SL-2025-JAN,450.00,Credit Card,3,Completed
+Slack,V-006,2025-02-05,SL-2025-FEB,450.00,Credit Card,3,Completed
+OfficeMax,V-007,2025-01-25,OM-2025-001,890.50,ACH,20,Completed
+OfficeMax,V-007,2025-03-15,OM-2025-002,1250.00,ACH,25,Completed
+Zoom,V-008,2025-01-08,ZM-2025-JAN,320.00,Credit Card,2,Completed
+Zoom,V-008,2025-02-08,ZM-2025-FEB,320.00,Credit Card,2,Completed
+Azure Cloud Services,V-001,2025-04-15,AZ-2025-0004,15200.00,Wire Transfer,10,Completed
+Azure Cloud Services,V-001,2025-05-15,AZ-2025-0005,18500.00,Wire Transfer,13,Completed
+Dell Computers,V-002,2025-07-20,DELL-2025-003,8900.00,ACH,19,Completed
+Staffing Agency,V-005,2025-06-01,SA-2025-JUN,14700.00,ACH,16,Completed
+Azure Cloud Services,V-001,2025-10-15,AZ-2025-0010,22000.00,Wire Transfer,9,Completed
+Azure Cloud Services,V-001,2025-12-15,AZ-2025-0012,12600.00,Wire Transfer,15,Completed
+WeWork,V-003,2025-12-01,WW-2025-DEC,7500.00,Wire Transfer,1,Completed
