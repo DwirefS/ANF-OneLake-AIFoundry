@@ -49,7 +49,7 @@ graph TD
     subgraph Intelligence [Intelligence Layer]
         Indexer["OneLake Indexer"]
         AISearch[("Azure AI Search\n(Vector Store)")]
-        Agent["Microsoft Foundry\nAgent (GPT-4)"]
+        Agent["Microsoft Foundry\nAgent (GPT-4.1)"]
 
         OneLake --> Indexer
         Indexer -->|Extract & Vectorize| AISearch
@@ -194,10 +194,10 @@ If you prefer to manually create a VNet first, follow these steps. Otherwise, yo
 2. In the left menu, select **Capacity pools**, then click **+ Add pool**.
 3. Fill in:
    * **Name**: `Workshop-Pool`
-   * **Service level**: The dropdown defaults to **Premium** — change it to **Flexible** (allows 1 TiB minimum and is more cost-effective) OR **Standard** (requires 2 TiB minimum). The available options are: Standard, Premium, Ultra, and Flexible.
-   * **Size**: The form defaults to **4 TiB** — change it:
-     * If **Flexible**: `1 TiB` (minimum)
-     * If **Standard**: `2 TiB` (minimum)
+   * **Service level**: The dropdown defaults to **Premium** — change it to **Standard** (most cost-effective for labs). The available options are: Standard, Premium, Ultra, and Flexible.
+   * **Size**: The form defaults to **4 TiB** — change it to **2 TiB** (the minimum required by Azure for Standard tier).
+
+   > ⚠️ **Common mistake**: Some older guides reference 1 TiB as the minimum. Azure enforces a **2 TiB minimum** for Standard capacity pools. If using Flexible tier, 1 TiB is allowed, but Standard is recommended for this lab.
    * **Throughput (MiB/s)** (**Flexible only — required field**): When you select Flexible, a mandatory **Throughput (MiB/s)** field appears. Set this to **128** (the minimum allowed is 128 MiB/s).
    * **QoS Type**: When Flexible is selected, QoS auto-sets to **Manual** (read-only). No action needed.
    * **Encryption type**: Leave as **Single** (default). Double encryption is available but not needed for this lab.
@@ -205,7 +205,7 @@ If you prefer to manually create a VNet first, follow these steps. Otherwise, yo
 
 ⏳ **Note**: Pool creation is typically instantaneous (a few seconds), not 5–10 minutes. The pool will appear immediately in the Capacity pools list with status "Succeeded".
 
-✅ **Verification**: After creation, the Capacity pools section should list `Workshop-Pool` with status "Succeeded", Service level "Flexible", and Size "1 TiB".
+✅ **Verification**: After creation, the Capacity pools section should list `Workshop-Pool` with status "Succeeded", Service level "Standard", and Size "2 TiB".
 
 ### 3.4 Create a Volume
 
@@ -934,6 +934,33 @@ print(f'Errors: {history.get(\"errors\", [])}')
 2. The Lakehouse shortcut shows files (open Lakehouse in Fabric → expand Files → your shortcut)
 3. Re-run the indexer after data appears: `curl -s -X POST "$SEARCH_URL/indexers/anf-onelake-indexer/run?api-version=2024-11-01-preview" -H "api-key: $SEARCH_KEY"`
 
+> ⚠️ **Important — Indexer Reset After Failures**: If the indexer fails or processes 0 documents on the first run, you **must reset it before retrying**. The indexer's change-tracking cache remembers already-processed documents. Without a reset, subsequent runs may skip all documents.
+>
+> **To reset via portal**: Open the indexer in the Azure Portal → Click **Reset** → then **Run**.
+>
+> **To reset via CLI**:
+> ```bash
+> curl -s -X POST "$SEARCH_URL/indexers/anf-onelake-indexer/reset?api-version=2024-11-01-preview" \
+>   -H "api-key: $SEARCH_KEY"
+> ```
+
+### 9.6 Upgrade to Multimodal Vectorized Index (Recommended)
+
+The REST API approach in Steps 9.2–9.4 creates a **basic text-only index** (no vectorization, no image extraction). For the full multimodal RAG experience with hybrid search, use the portal wizard:
+
+1. In the Azure portal, open your **AI Search** resource.
+2. Click **Import and vectorize data** (NOT "Import data" — that's the older, non-vectorized wizard).
+3. Select **OneLake** as the data source → choose your existing Lakehouse and shortcut.
+4. Configure **Vectorization**:
+   * **Kind**: **Microsoft Foundry** (⚠️ NOT "Azure OpenAI" — that option will fail!)
+   * **Select your Foundry project**: Choose your project
+   * **Select your embedding deployment**: `text-embedding-3-large`
+5. Configure **Multimodal settings**:
+   * **Verbalize images**: ✅ Checked (uses GPT-4.1 to convert charts/tables to searchable text)
+6. Click **Create** to build the vectorized index with skillset.
+
+> 💡 **Why Microsoft Foundry kind?** The "Azure OpenAI" vectorization kind requires a direct Azure OpenAI resource connection. The "Microsoft Foundry" kind connects through your Foundry project, which handles the RBAC and service chain correctly. This is a known gotcha — selecting the wrong kind is a common source of indexing failures.
+
 ---
 
 ## 10. Create a Microsoft Foundry Hub and Project
@@ -946,7 +973,7 @@ print(f'Errors: {history.get(\"errors\", [])}')
 2. Click **+ Create**.
 3. Fill in:
    * **Resource group**: `HOL-Workshop-RG`
-   * **Region**: `East US 2` (or a region where GPT-4o is available; alternatives: Sweden Central, West US 3)
+   * **Region**: `East US 2` (or a region where GPT-4.1 is available; alternatives: Sweden Central, West US 3)
    * **Name**: `Workshop-AI-Services`
    * **Pricing tier**: `Standard S0`
 4. Click **Review + create**, then **Create**.
@@ -958,16 +985,16 @@ print(f'Errors: {history.get(\"errors\", [])}')
 1. Open the AI Services resource you just created.
 2. In the left menu, click **Model deployments** (or **Manage Deployments** — this opens the Microsoft Foundry Studio).
 3. You'll be redirected to Microsoft Foundry (ai.azure.com). Click **Create new deployment** (or **+ Deploy model**).
-4. Deploy **gpt-4o**:
-   * **Model name**: `gpt-4o`
-   * **Model version**: Select the latest version (e.g., 2024-11-20)
-   * **Deployment name**: `gpt-4o`
+4. Deploy **gpt-4.1**:
+   * **Model name**: `gpt-4.1`
+   * **Model version**: `2025-04-14` (or the latest available)
+   * **Deployment name**: `gpt-4.1`
    * **Deployment type**: `Global Standard`
    * **Tokens Per Minute (TPM)**: `250000` (adjust based on quota)
    * Click **Deploy**
-5. Deploy **text-embedding-3-small** (required for AI Search vectorization):
-   * **Model name**: `text-embedding-3-small`
-   * **Deployment name**: `text-embedding-3-small`
+5. Deploy **text-embedding-3-large** (required for AI Search vectorization — the larger model produces richer 3072-dimensional embeddings for multimodal data):
+   * **Model name**: `text-embedding-3-large`
+   * **Deployment name**: `text-embedding-3-large`
    * **Deployment type**: `Global Standard`
    * Click **Deploy**
 
@@ -1028,13 +1055,13 @@ This step allows you to call the deployed models from agents.
 
 ## 11. Run and Validate the RAG Pipeline
 
-**Goal**: Validate the complete zero-copy RAG flow by querying GPT-4o grounded on indexed ANF data.
+**Goal**: Validate the complete zero-copy RAG flow by querying GPT-4.1 grounded on indexed ANF data.
 
 This section provides two approaches: **11A** tests the pipeline immediately via REST API (recommended for validation), and **11B** creates a persistent agent in the Foundry portal.
 
 ### 11A. Validate via REST API ("On Your Data")
 
-This approach uses the Azure OpenAI **"On Your Data"** feature, which sends queries to GPT-4o with Azure AI Search as a grounding data source. This is the fastest way to validate the end-to-end pipeline and does **not** require a Foundry project.
+This approach uses the Azure OpenAI **"On Your Data"** feature, which sends queries to GPT-4.1 with Azure AI Search as a grounding data source. This is the fastest way to validate the end-to-end pipeline and does **not** require a Foundry project.
 
 #### 11A.1 Set Environment Variables
 
@@ -1065,7 +1092,7 @@ echo "Search Key length: ${#SEARCH_KEY}"
 
 ```bash
 curl -s -X POST \
-  "$AI_ENDPOINT/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview" \
+  "$AI_ENDPOINT/openai/deployments/gpt-4.1/chat/completions?api-version=2024-08-01-preview" \
   -H "Content-Type: application/json" \
   -H "api-key: $AI_KEY" \
   -d '{
@@ -1115,7 +1142,7 @@ Once you confirm documents are being retrieved, try a more targeted question:
 
 ```bash
 curl -s -X POST \
-  "$AI_ENDPOINT/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview" \
+  "$AI_ENDPOINT/openai/deployments/gpt-4.1/chat/completions?api-version=2024-08-01-preview" \
   -H "Content-Type: application/json" \
   -H "api-key: $AI_KEY" \
   -d '{
@@ -1147,7 +1174,7 @@ curl -s -X POST \
   }' | python3 -m json.tool
 ```
 
-This validates the complete **zero-copy RAG pipeline**: ANF → OneLake Shortcut → AI Search → GPT-4o.
+This validates the complete **zero-copy RAG pipeline**: ANF → OneLake Shortcut → AI Search → GPT-4.1.
 
 ---
 
@@ -1171,7 +1198,7 @@ If you want a persistent, interactive agent experience, create one in the Micros
      If asked about data not in your knowledge base, say "I don't have that information in my available documents."
      ```
 
-   * **Deployment**: Select `gpt-4o` (from Section 10.2)
+   * **Deployment**: Select `gpt-4.1` (from Section 10.2)
 
 #### 11B.2 Add Knowledge (AI Search Index)
 
@@ -1182,7 +1209,7 @@ If you want a persistent, interactive agent experience, create one in the Micros
    * **Azure AI Search resource connection**: If no connection exists, click **Connect other Azure AI Search resource**, select your AI Search service, and click **Add connection**.
    * **Azure AI Search index**: Select `anf-finance-index` (created in Section 9).
    * **Display name**: Enter `anf-finance-index` (must be all lowercase — no uppercase letters allowed).
-   * **Search type**: Should auto-populate as **Keyword** (or **Hybrid** if vectorization was configured).
+   * **Search type**: If you created the vectorized index (Step 9.6), select **Hybrid (vector + keyword)**. If using the basic text index (Step 9.3), select **Keyword**.
    * **Retrieved documents**: Leave at default (5) or adjust to 3–20 as needed.
 5. Click **Add**.
 
@@ -1555,15 +1582,17 @@ All six pillars are operational. The data never left Azure NetApp Files — it r
 **Problem**: Index created but vectorization failed.
 
 * **Solution**:
-  1. Verify the `text-embedding-3-small` model is deployed (check Section 10.2).
-  2. If using the REST API approach (Section 9), vectorization is not configured by default. To add vectorization, use the portal "Import data (new)" wizard with your existing data source, or configure a skillset via the REST API.
-  3. Re-run the indexer.
+  1. Verify the `text-embedding-3-large` model is deployed (check Section 10.2).
+  2. When using the portal "Import and vectorize data" wizard, select **Kind: Microsoft Foundry** (NOT "Azure OpenAI" — that option will fail). Select your Foundry project and the `text-embedding-3-large` embedding deployment.
+  3. If using the REST API approach (Section 9), vectorization is not configured by default. To add vectorization, use the portal wizard with your existing data source, or configure a skillset via the REST API.
+  4. **Always RESET the indexer** after a failed run before retrying (open the indexer in the portal → Click **Reset** → then **Run**). Otherwise, the change-tracking cache skips already-processed documents.
+  5. Re-run the indexer.
 
 ### RAG Query / Agent Issues
 
 **Problem**: "On Your Data" REST API (Step 11A) returns "Resource not found" (404).
 
-* **Solution**: Verify the deployment name in the URL matches exactly (e.g., `gpt-4o`). Check that the AI Services endpoint URL is correct and includes the full path: `$AI_ENDPOINT/openai/deployments/gpt-4o/chat/completions?api-version=2024-08-01-preview`.
+* **Solution**: Verify the deployment name in the URL matches exactly (e.g., `gpt-4.1`). Check that the AI Services endpoint URL is correct and includes the full path: `$AI_ENDPOINT/openai/deployments/gpt-4.1/chat/completions?api-version=2024-08-01-preview`.
 
 **Problem**: "On Your Data" query says "The requested information is not available in the retrieved data."
 

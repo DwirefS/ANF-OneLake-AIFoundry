@@ -359,4 +359,4 @@ This pattern scales from workshops to real enterprise deployments. All six pilla
 ## How to use this
 1.  **Distribute**: Send the `lab_guide.md` and `test_data` folder to your workshop participants.
 2.  **Pre-Flight**: ensure their subscriptions are whitelisted for the Azure NetApp Files Object REST API Access preview interactively.
-3.  **Run**: Follow the guide step-by-step. The new "Run and Validate a Grounded Agent" section in Section 6 provides a strong "wow" moment for the demo.
+3.  **Run**: Follow the guide step-by-step. Section 6 validates the basic RAG pipeline, and Sections 7–9 build toward the full 6-pillar agent — the "wow" moment where RAG, live data, calculations, and file generation all work together.
